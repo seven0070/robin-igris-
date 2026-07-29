@@ -1,0 +1,15 @@
+services:
+  voice:
+    image: python:3.12-slim
+    working_dir: /app
+    volumes:
+      - ./:/app
+    command: bash -lc "pip install -r requirements.txt && python -m robin_igris.voice_server"
+    ports:
+      - "8787:8787"
+    environment:
+      - VOICE_HOST=0.0.0.0
+      - VOICE_PORT=8787
+      - TTS_PROVIDER=edge
+      - EDGE_TTS_VOICE=en-US-JennyNeural
+    # Hermes gateway runs on the host: hermes gateway

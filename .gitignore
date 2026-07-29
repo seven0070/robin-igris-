@@ -12,3 +12,8 @@ build/
 .DS_Store
 *.log
 .gradio/
+companion/node_modules/
+companion/dist/
+companion/.cache/
+companion/public/assets/
+*.zip

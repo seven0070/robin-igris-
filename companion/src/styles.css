@@ -1,0 +1,37 @@
+:root {
+  --bg0: #0b1020;
+  --bg1: #121a33;
+  --ink: #e8eefc;
+  --muted: #9aabcc;
+  --accent: #6ee0c0;
+  --accent-2: #7aa2ff;
+  --danger: #ff7a8a;
+  --panel: rgba(12, 18, 36, 0.55);
+  --line: rgba(232, 238, 252, 0.12);
+  --font-ui: 'Outfit', sans-serif;
+  --font-display: 'Instrument Serif', Georgia, serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  margin: 0;
+  min-height: 100%;
+  height: 100%;
+  color: var(--ink);
+  font-family: var(--font-ui);
+  background:
+    radial-gradient(1200px 700px at 70% 10%, rgba(122, 162, 255, 0.22), transparent 55%),
+    radial-gradient(900px 600px at 15% 90%, rgba(110, 224, 192, 0.14), transparent 50%),
+    linear-gradient(160deg, var(--bg0), var(--bg1));
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
