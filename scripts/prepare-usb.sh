@@ -108,10 +108,15 @@ mkdir -p "$DEST/data/home/.hermes"
 cp "$ROOT_REPO/character/SOUL.md" "$DEST/data/home/.hermes/SOUL.md"
 cp "$ROOT_REPO/character/SOUL.md" "$DEST/data/system3/SOUL.md" 2>/dev/null || true
 
-echo "==> Born-for-pendrive dirs (shell / queue / soul)"
-mkdir -p "$DEST/data/shell" "$DEST/data/queue" "$DEST/data/aos/soul" "$DEST/core" "$DEST/boot"
+echo "==> Born-for-pendrive dirs (shell / queue / soul / robin)"
+mkdir -p "$DEST/data/shell" "$DEST/data/queue" \
+  "$DEST/data/aos/soul" "$DEST/data/aos/robin" \
+  "$DEST/data/aos/lived_seed" "$DEST/data/aos/novel_llm" \
+  "$DEST/data/aos/research" "$DEST/data/aos/rag" \
+  "$DEST/core" "$DEST/boot" "$DEST/bin" "$DEST/docs"
 cp "$ROOT_REPO/docs/research/PNAOS_VISION.md" "$DEST/PNAOS_VISION.md" 2>/dev/null || true
 cp "$ROOT_REPO/docs/research/USB_LAYOUT.md" "$DEST/USB_LAYOUT.md" 2>/dev/null || true
+cp "$ROOT_REPO/docs/ONE_CLICK_USB.md" "$DEST/docs/ONE_CLICK_USB.md" 2>/dev/null || true
 
 # Initialize Pendrive-Native Agent OS soul + manifest
 echo "==> Initializing AOS soul"
@@ -123,5 +128,5 @@ echo "Next:"
 echo "  1) Edit $DEST/.env (API keys)"
 echo "  2) Eject safely"
 echo "  3) Companion: LAUNCH.bat / launch.sh"
-echo "  4) Agent OS:  AOS_BOOT.bat / aos-boot.sh"
+echo "  4) Agent OS:  AOS_BOOT.bat / aos-boot.sh  →  :robin"
 du -sh "$DEST" 2>/dev/null || true

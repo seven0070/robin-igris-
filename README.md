@@ -89,11 +89,23 @@ languages/                 Language prototypes
 
 ## USB pendrive (128GB) — Agent OS
 
+**One-click install:** plug in the stick, then from this repo:
+
+| OS | Double-click / run |
+|----|--------------------|
+| Windows | `INSTALL_TO_USB.bat` |
+| macOS | `INSTALL_TO_USB.command` |
+| Linux | `./INSTALL_TO_USB.sh` |
+
+See [docs/ONE_CLICK_USB.md](docs/ONE_CLICK_USB.md). Manual: `./scripts/prepare-usb.sh /path/to/USB/ROBIN_IGRIS`
+
 The stick is home; the PC is borrowed hardware; **the agent is the shell**.
 
 ```bash
-./scripts/prepare-usb.sh /path/to/USB/ROBIN_IGRIS
-# then: AOS_BOOT.bat  or  ./aos-boot.sh
+# after install, on the stick:
+AOS_BOOT.bat          # Windows
+./aos-boot.sh         # Linux/macOS
+# then: :robin
 ```
 
 Design paper: [docs/research/PENDRIVE_AGENT_OS.md](docs/research/PENDRIVE_AGENT_OS.md)  

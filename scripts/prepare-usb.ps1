@@ -63,8 +63,25 @@ TTS_PROVIDER=edge
 Copy-Item "$Repo\scripts\start-omniroute.sh" "$Dest\start-omniroute.sh" -Force
 New-Item -ItemType Directory -Force -Path "$Dest\data\omniroute" | Out-Null
 
-New-Item -ItemType Directory -Force -Path "$Dest\data\home\.hermes" | Out-Null
+New-Item -ItemType Directory -Force -Path @(
+  "$Dest\data\home\.hermes",
+  "$Dest\data\shell",
+  "$Dest\data\queue",
+  "$Dest\data\aos\soul",
+  "$Dest\data\aos\robin",
+  "$Dest\data\aos\lived_seed",
+  "$Dest\data\aos\novel_llm",
+  "$Dest\data\aos\research",
+  "$Dest\data\aos\rag",
+  "$Dest\core",
+  "$Dest\boot",
+  "$Dest\bin",
+  "$Dest\docs"
+) | Out-Null
 Copy-Item "$Repo\character\SOUL.md" "$Dest\data\home\.hermes\SOUL.md" -Force
+if (Test-Path "$Repo\docs\ONE_CLICK_USB.md") {
+  Copy-Item "$Repo\docs\ONE_CLICK_USB.md" "$Dest\docs\ONE_CLICK_USB.md" -Force
+}
 
 Write-Host "==> Initializing AOS soul"
 $env:PYTHONPATH = "$Dest\app"
@@ -72,3 +89,4 @@ $env:PYTHONPATH = "$Dest\app"
 
 Write-Host "USB kit ready at $Dest"
 Write-Host "Edit .env then use AOS_BOOT.bat (Agent OS) or LAUNCH.bat (companion)"
+Write-Host "Docs: docs\ONE_CLICK_USB.md · usb\README.md"
