@@ -38,13 +38,16 @@ class AgentShell:
             f"  sealed ok : {st.get('soul_sealed_ok')}",
             f"  host      : {hw.get('hostname')} ({hw.get('system')})",
             f"  display   : {hw.get('has_display')}  network: {hw.get('has_network')}",
-            f"  usb root  : {self.kernel.root}",
+            "  axioms   : offline-first · permissioned WiFi · self-evolving shell",
+            f"  wifi     : {(st.get('wifi') or {}).get('current_ssid')} "
+            f"(pending queue={st.get('offline_queue_pending', 0)})",
+            f"  usb root : {self.kernel.root}",
             "",
             f"  capabilities allowed: {allowed}",
             f"  absent (no stubs)   : {denied}",
             "",
             "  Unplug USB or Ctrl+C = intentional shutdown (soul sealed).",
-            "  Type a message, or :status / :soul / :goals / :buzz / :quit",
+            "  :status :soul :goals :buzz :wifi :evolve :flush :quit",
             "",
         ]
         return "\n".join(lines)
@@ -95,6 +98,41 @@ class AgentShell:
                 return buzz_status()
             except Exception as exc:  # noqa: BLE001
                 return json.dumps({"error": str(exc)})
+        if text == ":wifi":
+            if not self.kernel.wifi:
+                return json.dumps({"error": "no wifi contract"})
+            return json.dumps(self.kernel.wifi.status(), indent=2)
+        if text == ":evolve":
+            if not self.kernel.evolution:
+                return json.dumps({"error": "no evolution store"})
+            return json.dumps(self.kernel.evolution.status(), indent=2)
+        if text.startswith(":checkpoint"):
+            if not self.kernel.evolution:
+                return json.dumps({"error": "no evolution store"})
+            label = text[len(":checkpoint") :].strip() or "manual"
+            return json.dumps(self.kernel.evolution.checkpoint(label), indent=2)
+        if text.startswith(":rollback"):
+            if not self.kernel.evolution:
+                return json.dumps({"error": "no evolution store"})
+            cid = text[len(":rollback") :].strip() or None
+            return json.dumps(self.kernel.evolution.rollback(cid), indent=2, default=str)
+        if text == ":flush":
+            def _send(p: dict) -> Any:
+                from robin_igris.buzz.tools import buzz_send_message
+
+                return json.loads(
+                    buzz_send_message(
+                        p.get("content", ""),
+                        channel=p.get("channel"),
+                        reply_to=p.get("reply_to"),
+                    )
+                )
+
+            handlers = {
+                "buzz_send_message": _send,
+                "check_buzz": lambda p: {"ok": True, "payload": p},
+            }
+            return json.dumps(self.kernel.flush_queue(handlers), indent=2, default=str)
         if text.startswith(":cap "):
             name = text[5:].strip()
             try:

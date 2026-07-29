@@ -7,7 +7,14 @@ the host PC is borrowed peripherals.
 > (3) agent-as-shell UI, (4) unplug-as-intentional-shutdown, and (5) cryptographic soul-on-stick.
 > Prior work supplies the pieces; PNAOS is the composition.
 
-**Full paper draft:** [PNAOS_PAPER.md](PNAOS_PAPER.md)
+**Full paper draft:** [PNAOS_PAPER.md](PNAOS_PAPER.md)  
+**Born-for-pendrive vision:** [PNAOS_VISION.md](PNAOS_VISION.md)
+
+### Three axioms (v2)
+
+1. **Offline-first** — the pendrive *is* the world; WiFi is a borrowed sense.
+2. **Permissioned connectivity** — Manifest-authorized SSIDs/actions only; offline default.
+3. **Self-evolving shell** — skills grow under agent control; immutable core never updates over WiFi.
 
 ## Research lineage
 

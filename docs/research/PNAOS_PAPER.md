@@ -10,11 +10,13 @@ Correspondence: sanathpatil8861@gmail.com
 
 ## Abstract
 
-Recent work formalizes *Agent Operating Systems* (AOS), Manifest-Only capability isolation, cryptographically portable agent memory, and Infrastructure-as-Prompts hardware discovery. None of these systems, however, treat **USB-resident boot**, **host-as-borrowed-peripherals**, **agent-as-shell UI**, **unplug-as-intentional-shutdown**, and **soul-on-stick identity** as first-class design constraints simultaneously.
+Recent work formalizes *Agent Operating Systems* (AOS), Manifest-Only capability isolation, cryptographically portable agent memory, and Infrastructure-as-Prompts hardware discovery. None of these systems treat a USB stick as the agent’s **born home**.
 
-We introduce **Pendrive-Native Agent OS (PNAOS)**: a composition architecture in which the agent *is* the operating system shell, the USB stick is home storage for identity and memory, and every host PC is interchangeable borrowed hardware discovered at boot. We map prior papers onto layers of this stack, state the five-axiom gap that no existing paper fills, describe a userspace reference implementation (Robin Igris), and propose evaluation criteria for continuity, capability enforcement, and unplug seal reliability.
+We introduce **Pendrive-Native Agent OS (PNAOS)** under three design axioms: **(1) offline-first** — the pendrive is the world; WiFi is a borrowed sense; **(2) permissioned connectivity** — only Manifest-authorized SSIDs and actions; **(3) self-evolving shell** — skills and POLICY grow under agent control while an **immutable core** updates only via a physically presented signed key. The agent *is* the shell; unplug is intentional shutdown; identity lives on the stick.
 
-> **Contribution claim.** PNAOS is not a new scheduler or a new memory codec in isolation. It is the first design that **pulls AOS + AgenticOS + Portable Agent Memory + Octopus into a single bootable, USB-resident image** where the agent *is* the OS.
+> **Contribution claim.** PNAOS is not an OS *ported* to USB. It is an OS *born* for USB — composing AOS + AgenticOS + PAM + Octopus into a sealed-core / evolving-shell architecture where persistence and growth of the agent are the primary design goals.
+
+**Vision (full):** [`PNAOS_VISION.md`](PNAOS_VISION.md)
 
 ---
 
@@ -22,15 +24,15 @@ We introduce **Pendrive-Native Agent OS (PNAOS)**: a composition architecture in
 
 AI agents today are applications bolted onto conventional desktops: they borrow a fixed machine’s filesystem, network stack, and display session, and their “identity” is scattered across cloud accounts, local caches, and chat logs. A parallel research thread asks a harder question: what if the *agent* were the primary OS abstraction?
 
-Several 2025–2026 papers build pieces of that answer—agentic control planes, Manifest-gated capabilities, portable memory, hardware-as-prompt—but each assumes fixed hardware or sits atop a traditional host OS. The design we pursue is stricter and more personal:
+Several 2025–2026 papers build pieces of that answer—agentic control planes, Manifest-gated capabilities, portable memory, hardware-as-prompt—but each assumes fixed hardware or sits atop a traditional host OS. The design we pursue was **born for a pendrive**:
 
-1. The OS boots from a **USB stick** (session in RAM; durable state on the stick).
-2. The host computer is **borrowed peripherals**, rediscovered every plug-in.
-3. The agent **is** the OS—no desktop, no window manager, no login screen; the avatar *is* the shell.
-4. **Unplugging** is the intended shutdown, not a crash.
-5. The agent’s **identity and memories live on the USB**; hardware is interchangeable.
+**Three axioms**
 
-No published system states all five together. This paper positions PNAOS in that gap, surveys the pieces that already exist, and describes a reference composition.
+1. **Offline-first** — everything needed for the agent to *be itself* lives on the USB; WiFi is optional.
+2. **Permissioned connectivity** — only authorized SSIDs and Manifest actions; offline is the default.
+3. **Self-evolving shell** — skills/models/POLICY grow; immutable core never updates over the network.
+
+Plus the earlier composition constraints: agent-as-shell UI, unplug-as-shutdown, soul-on-stick, host-as-borrowed-peripherals.
 
 ---
 

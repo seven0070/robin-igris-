@@ -13,7 +13,10 @@ from aos.lifecycle import Lifecycle
 from aos.manifest import Manifest, ManifestRuntime
 from aos.octopus import as_prompt as octopus_prompt
 from aos.octopus import probe as octopus_probe
+from aos.evolution import EvolutionStore
+from aos.offline_queue import OfflineQueue
 from aos.soul import SoulStore
+from aos.wifi_contract import WifiContract
 
 
 @dataclass
@@ -35,6 +38,9 @@ class AgentKernel:
     goals: list[Goal] = field(default_factory=list)
     audit_path: Path = field(init=False)
     hardware: dict[str, Any] = field(default_factory=dict)
+    wifi: WifiContract | None = None
+    queue: OfflineQueue | None = None
+    evolution: EvolutionStore | None = None
 
     @classmethod
     def create(cls, usb_root: Path, manifest_path: Path | None = None) -> "AgentKernel":
@@ -58,6 +64,12 @@ class AgentKernel:
         runtime = ManifestRuntime(manifest=manifest)
         runtime.synthesize(hardware)
         life = Lifecycle(soul=soul, log_path=aos_data / "lifecycle.jsonl")
+        wifi = WifiContract.from_manifest_raw(
+            manifest.raw,
+            usage_path=aos_data / "wifi_usage.json",
+        )
+        queue = OfflineQueue(usb_root / "data" / "queue")
+        evolution = EvolutionStore(usb_root / "data" / "shell")
         kernel = cls(
             root=usb_root,
             manifest=manifest,
@@ -65,13 +77,24 @@ class AgentKernel:
             runtime=runtime,
             lifecycle=life,
             hardware=hardware,
+            wifi=wifi,
+            queue=queue,
+            evolution=evolution,
         )
         kernel.audit_path = aos_data / "audit.jsonl"
         kernel.goals = [
             Goal(id=g.get("id", str(uuid.uuid4())), text=g.get("text", ""))
             for g in manifest.goals
         ]
-        kernel.audit("boot", {"hardware": hardware, "effective": runtime.effective})
+        kernel.audit(
+            "boot",
+            {
+                "hardware": hardware,
+                "effective": runtime.effective,
+                "wifi": wifi.status(),
+                "axioms": ["offline-first", "permissioned-wifi", "self-evolving-shell"],
+            },
+        )
         return kernel
 
     def audit(self, kind: str, payload: dict[str, Any]) -> None:
@@ -115,9 +138,49 @@ class AgentKernel:
                     self.soul.append("episodic", f"Goal {goal_id}: {note}", meta={"goal": goal_id})
                 return
 
+    def mediate_wifi(self, action: str, fn: Callable[[], Any], *, bytes_estimate: int = 0) -> Any:
+        """Permissioned connectivity — queue if denied and queue is available."""
+        assert self.wifi is not None
+        ok, reason = self.wifi.allow(action, bytes_estimate=bytes_estimate)
+        self.audit("wifi_gate", {"action": action, "ok": ok, "reason": reason})
+        if not ok:
+            raise PermissionError(reason)
+        result = fn()
+        self.wifi.record_usage(bytes_used=max(bytes_estimate, 1))
+        return result
+
+    def enqueue_offline(self, action: str, payload: dict[str, Any], *, wifi_action: str) -> str:
+        assert self.queue is not None
+        job_id = self.queue.enqueue(action, payload, wifi_action=wifi_action)
+        self.audit("offline_enqueue", {"id": job_id, "action": action, "wifi_action": wifi_action})
+        return job_id
+
+    def flush_queue(self, handlers: dict[str, Callable[[dict[str, Any]], Any]] | None = None) -> dict[str, Any]:
+        assert self.queue is not None and self.wifi is not None
+        handlers = handlers or {}
+        return self.queue.flush(
+            allow=lambda a: self.wifi.allow(a),  # type: ignore[union-attr]
+            handlers=handlers,
+        )
+
     def boot_context(self) -> str:
+        wifi_txt = ""
+        if self.wifi:
+            st = self.wifi.status()
+            wifi_txt = (
+                f"\n## WiFi contract (offline default)\n"
+                f"ssid={st.get('current_ssid')} default={st.get('default')}\n"
+                "Online actions require Manifest wifi.networks permission.\n"
+            )
+        evo_txt = ""
+        if self.evolution:
+            evo_txt = (
+                f"\n## Evolving shell\n{json.dumps(self.evolution.status(), indent=2)}\n"
+                "Propose Manifest changes for human approval; skills may self-promote after verify.\n"
+            )
         return (
-            "# Pendrive-Native Agent OS\n"
+            "# Pendrive-Native Agent OS (born for USB)\n"
+            "Axioms: offline-first · permissioned WiFi · self-evolving shell.\n"
             "You are the operating system shell. There is no desktop. The avatar is the UI.\n"
             "Unplugging the USB is intentional shutdown — preserve the soul.\n\n"
             + self.runtime.context_prompt()
@@ -125,11 +188,14 @@ class AgentKernel:
             + octopus_prompt(self.hardware)
             + "\n"
             + self.soul.context_prompt()
+            + wifi_txt
+            + evo_txt
         )
 
     def status(self) -> dict[str, Any]:
-        return {
+        out: dict[str, Any] = {
             "manifest": self.manifest.name,
+            "axioms": ["offline-first", "permissioned-wifi", "self-evolving-shell"],
             "effective_capabilities": self.runtime.effective,
             "goals": [
                 {"id": g.id, "text": g.text, "progress": g.progress, "status": g.status}
@@ -149,3 +215,10 @@ class AgentKernel:
                 )
             },
         }
+        if self.wifi:
+            out["wifi"] = self.wifi.status()
+        if self.queue:
+            out["offline_queue_pending"] = len(self.queue.list_pending())
+        if self.evolution:
+            out["evolution"] = self.evolution.status()
+        return out

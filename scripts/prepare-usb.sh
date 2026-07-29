@@ -108,9 +108,10 @@ mkdir -p "$DEST/data/home/.hermes"
 cp "$ROOT_REPO/character/SOUL.md" "$DEST/data/home/.hermes/SOUL.md"
 cp "$ROOT_REPO/character/SOUL.md" "$DEST/data/system3/SOUL.md" 2>/dev/null || true
 
-# Initialize Pendrive-Native Agent OS soul + manifest
-echo "==> Initializing AOS soul"
-PYTHONPATH="$DEST/app" "$DEST/runtime/venv/bin/python" -m aos init --root "$DEST" || true
+echo "==> Born-for-pendrive dirs (shell / queue / soul)"
+mkdir -p "$DEST/data/shell" "$DEST/data/queue" "$DEST/data/aos/soul" "$DEST/core" "$DEST/boot"
+cp "$ROOT_REPO/docs/research/PNAOS_VISION.md" "$DEST/PNAOS_VISION.md" 2>/dev/null || true
+cp "$ROOT_REPO/docs/research/USB_LAYOUT.md" "$DEST/USB_LAYOUT.md" 2>/dev/null || true
 
 echo ""
 echo "USB kit ready at: $DEST"

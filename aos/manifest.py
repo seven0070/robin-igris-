@@ -53,11 +53,31 @@ DEFAULT_MANIFEST = {
         "buzz_search": True,
         "buzz_feed": True,
     },
+    "wifi": {
+        "default": "deny",
+        "networks": [
+            {
+                "ssid": "*",
+                "actions": [
+                    "sync_memory",
+                    "check_buzz",
+                    "pull_models",
+                    "omniroute_cloud",
+                    "web_search",
+                ],
+                "budget_mb_month": 500,
+            }
+        ],
+        "emergency": [
+            {"when": "soul_partition_pct > 90", "actions": ["upload_memory_backup"]}
+        ],
+    },
     "goals": [
         {"id": "presence", "text": "Remain available to the user via avatar shell"},
         {"id": "continuity", "text": "Preserve soul across unplug/replug"},
         {"id": "honesty", "text": "Never invent tool results; declare capability gaps"},
         {"id": "buzz", "text": "Collaborate with humans in the buzz.xyz shared workspace"},
+        {"id": "evolve", "text": "Grow skills offline; propose Manifest changes for human approval"},
     ],
 }
 
@@ -108,7 +128,7 @@ class Manifest:
             "capabilities": self.capabilities,
             "goals": self.goals,
         }
-        for key in ("budget", "routing", "tools"):
+        for key in ("budget", "routing", "tools", "wifi"):
             if self.raw.get(key) is not None:
                 payload[key] = self.raw[key]
         if path.suffix in {".yaml", ".yml"} and yaml is not None:
