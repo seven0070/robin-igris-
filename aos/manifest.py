@@ -61,6 +61,13 @@ DEFAULT_MANIFEST = {
         "host_launch_app": True,
         "host_computer_use": True,
         "host_run_command": True,
+        "intel_status": True,
+        "paper_ingest": True,
+        "paper_search": True,
+        "paper_promote": True,
+        "capability_rank": True,
+        "curation_add_sft": True,
+        "curation_export": True,
     },
     "host_control": {
         "enabled": False,
@@ -134,6 +141,14 @@ DEFAULT_MANIFEST = {
             "prioritize_voice_when_interactive": True,
             "batch_when_idle": True,
         },
+    },
+    "intelligence": {
+        "prefer_uncensored": True,
+        "prefer_privacy": False,
+        "paper_ingest": True,
+        "rag": True,
+        "curation": True,
+        "note": "Local model = private + uncensored; cloud spillover under WiFi+Manifest only",
     },
     "wifi": {
         "default": "deny",
@@ -210,7 +225,7 @@ class Manifest:
             "capabilities": self.capabilities,
             "goals": self.goals,
         }
-        for key in ("budget", "routing", "tools", "wifi", "host_control", "adaptability"):
+        for key in ("budget", "routing", "tools", "wifi", "host_control", "adaptability", "intelligence"):
             if self.raw.get(key) is not None:
                 payload[key] = self.raw[key]
         if path.suffix in {".yaml", ".yml"} and yaml is not None:

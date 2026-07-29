@@ -190,6 +190,15 @@ budgets, thermal throttle, DP Alt Mode / gadget / headless display paths, and
 Userspace already adapts via Manifest `adaptability` + `:adapt` — see
 [docs/CARRY_MICRO_HW.md](../CARRY_MICRO_HW.md).
 
+### Intelligence stack
+
+Local uncensored model + growing paper/OSINT library (PAM-linked) + Kairn skills
++ fine-tune curation. Cloud spillover via OmniRoute only when Manifest/WiFi
+allow. The goal is not “match GPT-5 on trivia” — it is to exceed frontier models
+**on your domain with your memory and tools**.
+
+See [docs/INTELLIGENCE_STACK.md](../INTELLIGENCE_STACK.md). Shell: `:intel` · `:papers`.
+
 Self-evolution needs languages *born* for agents, not ported from app stacks:
 
 | Language | Role |

@@ -171,6 +171,8 @@ from robin_igris.buzz.tools import TOOL_IMPLS as _BUZZ_IMPLS  # noqa: E402
 from robin_igris.buzz.tools import TOOL_SCHEMAS as _BUZZ_SCHEMAS  # noqa: E402
 from robin_igris.host_bridge.tools import TOOL_IMPLS as _HOST_IMPLS  # noqa: E402
 from robin_igris.host_bridge.tools import TOOL_SCHEMAS as _HOST_SCHEMAS  # noqa: E402
+from robin_igris.intel_tools import TOOL_IMPLS as _INTEL_IMPLS  # noqa: E402
+from robin_igris.intel_tools import TOOL_SCHEMAS as _INTEL_SCHEMAS  # noqa: E402
 
 
 TOOL_IMPLS: dict[str, Callable[..., str]] = {
@@ -181,6 +183,7 @@ TOOL_IMPLS: dict[str, Callable[..., str]] = {
     "recall_notes": recall_notes,
     **_BUZZ_IMPLS,
     **_HOST_IMPLS,
+    **_INTEL_IMPLS,
 }
 
 TOOL_SCHEMAS: list[dict[str, Any]] = [
@@ -263,6 +266,7 @@ TOOL_SCHEMAS: list[dict[str, Any]] = [
 
 TOOL_SCHEMAS.extend(_BUZZ_SCHEMAS)
 TOOL_SCHEMAS.extend(_HOST_SCHEMAS)
+TOOL_SCHEMAS.extend(_INTEL_SCHEMAS)
 
 
 def run_tool(name: str, arguments: dict[str, Any] | str) -> str:

@@ -48,7 +48,7 @@ class AgentShell:
             f"  absent (no stubs)   : {denied}",
             "",
             "  Unplug USB or Ctrl+C = intentional shutdown (soul sealed).",
-            "  :status :soul :goals :buzz :wifi :evolve :host :adapt :kairn :flush :quit",
+            "  :status :soul :goals :buzz :wifi :evolve :host :adapt :intel :papers :kairn :flush :quit",
             "",
         ]
         return "\n".join(lines)
@@ -111,6 +111,21 @@ class AgentShell:
                 return json.dumps({"error": "no adaptability contract"})
             self.kernel.adaptability.refresh(host_hardware=self.kernel.hardware)
             return json.dumps(self.kernel.adaptability.status(), indent=2, default=str)
+        if text == ":intel":
+            if not self.kernel.intelligence:
+                return json.dumps({"error": "no intelligence stack"})
+            return json.dumps(self.kernel.intelligence.status(), indent=2, default=str)
+        if text.startswith(":papers"):
+            if not self.kernel.intelligence:
+                return json.dumps({"error": "no intelligence stack"})
+            rest = text[len(":papers") :].strip()
+            if not rest:
+                return json.dumps(self.kernel.intelligence.papers.status(), indent=2, default=str)
+            return json.dumps(
+                self.kernel.intelligence.retrieve_for(rest),
+                indent=2,
+                default=str,
+            )
         if text == ":wifi":
             if not self.kernel.wifi:
                 return json.dumps({"error": "no wifi contract"})
@@ -189,8 +204,17 @@ class AgentShell:
                 user_text=text,
                 budget_usd=budget,
                 manifest_raw=self.kernel.manifest.raw,
+                capability_root=(
+                    self.kernel.root / "data" / "aos" / "intelligence"
+                    if self.kernel.intelligence
+                    else None
+                ),
             )
             ctx = self.kernel.boot_context() + "\n" + routing_context(decision)
+            if self.kernel.intelligence:
+                from aos.research.rag import as_prompt as rag_prompt
+
+                ctx += "\n" + rag_prompt(self.kernel.intelligence.retrieve_for(text))
             reply = chat_text(
                 [
                     {"role": "system", "content": ctx},

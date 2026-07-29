@@ -48,6 +48,7 @@ class AgentKernel:
     host_control: HostControlContract | None = None
     host_probe: dict[str, Any] = field(default_factory=dict)
     adaptability: AdaptabilityContract | None = None
+    intelligence: Any | None = None
 
     @classmethod
     def create(cls, usb_root: Path, manifest_path: Path | None = None) -> "AgentKernel":
@@ -84,6 +85,15 @@ class AgentKernel:
         host_probe_data = probe_host()
         adaptability = AdaptabilityContract.from_manifest_raw(manifest.raw)
         adaptability.probe(host_hardware=hardware)
+        intel_cfg = (manifest.raw or {}).get("intelligence") or {}
+        from robin_igris.intelligence import IntelligenceStack
+
+        intelligence = IntelligenceStack.create(
+            usb_root,
+            soul=soul,
+            prefer_uncensored=bool(intel_cfg.get("prefer_uncensored", True)),
+            prefer_privacy=bool(intel_cfg.get("prefer_privacy", False)),
+        )
         kernel = cls(
             root=usb_root,
             manifest=manifest,
@@ -97,6 +107,7 @@ class AgentKernel:
             host_control=host_control,
             host_probe=host_probe_data,
             adaptability=adaptability,
+            intelligence=intelligence,
         )
         kernel.audit_path = aos_data / "audit.jsonl"
         kernel.goals = [
@@ -204,12 +215,17 @@ class AgentKernel:
         adapt_txt = ""
         if self.adaptability:
             adapt_txt = "\n" + self.adaptability.context_prompt()
+        intel_txt = ""
+        if self.intelligence:
+            intel_txt = "\n" + self.intelligence.context_prompt()
         return (
             "# Carry / Pendrive-Native Agent OS (born for USB)\n"
             "Axioms: offline-first · permissioned WiFi · self-evolving shell · Manifest host control.\n"
             "You are the operating system shell. There is no desktop. The avatar is the UI.\n"
             "Unplugging the USB is intentional shutdown — preserve the soul.\n"
-            "Adapt to power/thermal/display; native RAM is private when on Carry Micro silicon.\n\n"
+            "Adapt to power/thermal/display; native RAM is private when on Carry Micro silicon.\n"
+            "Intelligence = local uncensored model + paper/PAM graph + Kairn skills + fine-tune curation;\n"
+            "cloud spillover only when Manifest/WiFi allow.\n\n"
             + self.runtime.context_prompt()
             + "\n"
             + octopus_prompt(self.hardware)
@@ -219,6 +235,7 @@ class AgentKernel:
             + evo_txt
             + host_txt
             + adapt_txt
+            + intel_txt
         )
 
     def status(self) -> dict[str, Any]:
@@ -261,5 +278,11 @@ class AgentKernel:
                 "display": st.get("display"),
                 "native_ram": st.get("native_ram"),
                 "behavior": st.get("behavior"),
+            }
+        if self.intelligence:
+            out["intelligence"] = {
+                "papers": self.intelligence.papers.status().get("count"),
+                "curation": self.intelligence.curation.status(),
+                "prefer_uncensored": self.intelligence.prefer_uncensored,
             }
         return out
