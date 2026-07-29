@@ -1,0 +1,108 @@
+#!/usr/bin/env bash
+# Prepare a 128GB USB folder with a self-contained Robin Igris kit.
+# Usage: ./scripts/prepare-usb.sh /path/to/USB/ROBIN_IGRIS
+set -euo pipefail
+
+ROOT_REPO="$(cd "$(dirname "$0")/.." && pwd)"
+DEST="${1:-}"
+if [[ -z "$DEST" ]]; then
+  echo "Usage: $0 /path/to/USB/ROBIN_IGRIS"
+  exit 1
+fi
+
+mkdir -p "$DEST"/{app,data/{home,system3,logs,xdg},runtime,companion-dist}
+touch "$DEST/.robin_usb"
+
+echo "==> Copying app"
+USE_RSYNC=0
+if type rsync >/dev/null 2>&1; then USE_RSYNC=1; fi
+if [[ "$USE_RSYNC" == "1" ]]; then
+  rsync -a --delete \
+    --exclude '.git' \
+    --exclude '.venv' \
+    --exclude 'node_modules' \
+    --exclude 'companion/node_modules' \
+    --exclude 'companion/dist' \
+    --exclude 'companion/.cache' \
+    --exclude 'companion/public/assets' \
+    --exclude 'data' \
+    --exclude '__pycache__' \
+    --exclude '.pytest_cache' \
+    "$ROOT_REPO/" "$DEST/app/"
+else
+  rm -rf "$DEST/app"
+  mkdir -p "$DEST/app"
+  cp -a "$ROOT_REPO/." "$DEST/app/"
+  rm -rf "$DEST/app/.git" "$DEST/app/.venv" \
+    "$DEST/app/companion/node_modules" "$DEST/app/companion/dist" \
+    "$DEST/app/companion/.cache" "$DEST/app/data" \
+    "$DEST/app/node_modules" 2>/dev/null || true
+  find "$DEST/app" -type d -name '__pycache__' -prune -exec rm -rf {} + 2>/dev/null || true
+fi
+
+echo "==> Building companion (AIRI Live2D) for USB display"
+(
+  cd "$ROOT_REPO/companion"
+  npm install
+  VITE_HERMES_BASE_URL=/hermes/v1 \
+  VITE_VOICE_BASE_URL= \
+  VITE_AGENT_NAME="Robin Igris" \
+  npm run build
+  if command -v rsync >/dev/null 2>&1; then
+    rsync -a dist/ "$DEST/companion-dist/"
+    if [[ -d public/assets ]]; then
+      mkdir -p "$DEST/companion-dist/assets"
+      rsync -a public/assets/ "$DEST/companion-dist/assets/"
+    fi
+  else
+    rm -rf "$DEST/companion-dist"
+    mkdir -p "$DEST/companion-dist"
+    cp -a dist/. "$DEST/companion-dist/"
+    if [[ -d public/assets ]]; then
+      mkdir -p "$DEST/companion-dist/assets"
+      cp -a public/assets/. "$DEST/companion-dist/assets/"
+    fi
+  fi
+)
+
+echo "==> Creating portable venv on the stick"
+python3 -m venv "$DEST/runtime/venv"
+# shellcheck disable=SC1091
+source "$DEST/runtime/venv/bin/activate"
+pip install -q -U pip
+pip install -q -r "$DEST/app/requirements.txt"
+
+echo "==> USB launchers + env"
+cp "$ROOT_REPO/usb/launch.sh" "$DEST/launch.sh"
+cp "$ROOT_REPO/usb/stop.sh" "$DEST/stop.sh"
+cp "$ROOT_REPO/usb/LAUNCH.bat" "$DEST/LAUNCH.bat"
+cp "$ROOT_REPO/usb/STOP.bat" "$DEST/STOP.bat"
+cp "$ROOT_REPO/usb/LAUNCH.command" "$DEST/LAUNCH.command"
+cp "$ROOT_REPO/usb/README.md" "$DEST/README.md"
+chmod +x "$DEST/launch.sh" "$DEST/stop.sh" "$DEST/LAUNCH.command"
+
+if [[ ! -f "$DEST/.env" ]]; then
+  cp "$ROOT_REPO/.env.example" "$DEST/.env"
+  cat >> "$DEST/.env" <<'EOF'
+
+# USB portable defaults
+ROBIN_SERVE_COMPANION=1
+ROBIN_OPEN_BROWSER=1
+VOICE_HOST=127.0.0.1
+VOICE_PORT=8787
+TTS_PROVIDER=edge
+EOF
+fi
+
+# Seed character onto USB Hermes home if present later
+mkdir -p "$DEST/data/home/.hermes"
+cp "$ROOT_REPO/character/SOUL.md" "$DEST/data/home/.hermes/SOUL.md"
+cp "$ROOT_REPO/character/SOUL.md" "$DEST/data/system3/SOUL.md" 2>/dev/null || true
+
+echo ""
+echo "USB kit ready at: $DEST"
+echo "Next:"
+echo "  1) Edit $DEST/.env (API keys)"
+echo "  2) Eject safely"
+echo "  3) On any PC: open LAUNCH.bat / launch.sh"
+du -sh "$DEST" 2>/dev/null || true

@@ -20,7 +20,11 @@ class ExecutiveMonitor:
     agent_name: str = field(
         default_factory=lambda: os.getenv("AGENT_NAME", "Robin Igris")
     )
-    data_root: Path = field(default_factory=lambda: Path("data/system3"))
+    data_root: Path = field(
+        default_factory=lambda: Path(
+            os.getenv("ROBIN_SYSTEM3_ROOT", "data/system3")
+        )
+    )
     wake_cost_usd: float = 0.02
     journal: GrowthJournal = field(init=False)
     metabolism: Metabolism = field(init=False)

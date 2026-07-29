@@ -61,5 +61,16 @@ robin_igris/voice_server.py
 docs/research/FOUNDATIONS.md
 ```
 
+## USB pendrive (128GB)
+
+Run entirely from a stick — the PC is only the display:
+
+```bash
+./scripts/prepare-usb.sh /path/to/USB/ROBIN_IGRIS
+# then on any PC: double-click LAUNCH.bat / ./launch.sh
+```
+
+See [usb/README.md](usb/README.md).
+
 ## License
 MIT — see [LICENSE](LICENSE). Cubism SDK is subject to Live2D’s license (fetched at build).

@@ -1,7 +1,7 @@
 /** Browser STT + server TTS + amplitude mouth driver. */
 
 const voiceBase = () =>
-  (import.meta.env.VITE_VOICE_BASE_URL || '/voice').replace(/\/$/, '')
+  (import.meta.env.VITE_VOICE_BASE_URL || '').replace(/\/$/, '')
 
 export type MouthDriver = (open: number) => void
 

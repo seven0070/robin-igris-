@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 
 from robin_igris.system3.monitor import ExecutiveMonitor
 from robin_igris.system3.skills import SkillBootstrap
-from robin_igris.system3.cadvp import Channel, DeliveryBus
+from robin_igris.system3.cadvp import Channel
 
 
 def main(argv: list[str] | None = None) -> int:
