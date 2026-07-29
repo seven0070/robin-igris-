@@ -107,6 +107,34 @@ DEFAULT_MANIFEST = {
             "cwd_must_be_under": ["~/Documents/projects/", "~/Desktop/"],
         },
     },
+    "adaptability": {
+        "board": "carry-micro-v0-sim",
+        "native_ram": {
+            "enabled": True,
+            "capacity_mb": 4096,
+            "private": True,
+        },
+        "power": {
+            "profile": "auto",
+            "respect_host_battery": True,
+        },
+        "thermal": {
+            "mode": "balanced",
+            "throttle_c": 80,
+        },
+        "display": {
+            "prefer": "auto",
+        },
+        "enclave": {
+            "required": False,
+            "tamper_wipe": True,
+            "attestation": "software-stub",
+        },
+        "scheduler": {
+            "prioritize_voice_when_interactive": True,
+            "batch_when_idle": True,
+        },
+    },
     "wifi": {
         "default": "deny",
         "networks": [
@@ -182,7 +210,7 @@ class Manifest:
             "capabilities": self.capabilities,
             "goals": self.goals,
         }
-        for key in ("budget", "routing", "tools", "wifi", "host_control"):
+        for key in ("budget", "routing", "tools", "wifi", "host_control", "adaptability"):
             if self.raw.get(key) is not None:
                 payload[key] = self.raw[key]
         if path.suffix in {".yaml", ".yml"} and yaml is not None:

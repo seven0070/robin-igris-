@@ -25,9 +25,11 @@ You ──voice/chat──▶ Companion (AIRI Live2D)
 | **Body** | [Project AIRI](https://github.com/moeru-ai/airi) | Live2D avatar + voice presence |
 | **OS** | PNAOS / **Carry** (`aos/`) | Pendrive Agent OS — agent is the shell |
 | **Host bridge** | Carry host control | Manifest-scoped FS / apps / computer-use |
+| **Micro HW** | Carry Micro | Native RAM + power/thermal/display adaptability |
 
 See [docs/research/FOUNDATIONS.md](docs/research/FOUNDATIONS.md), [docs/OMNIROUTE.md](docs/OMNIROUTE.md),
-[docs/BUZZ.md](docs/BUZZ.md), and [docs/CARRY_HOST_BRIDGE.md](docs/CARRY_HOST_BRIDGE.md).
+[docs/BUZZ.md](docs/BUZZ.md), [docs/CARRY_HOST_BRIDGE.md](docs/CARRY_HOST_BRIDGE.md),
+and [docs/CARRY_MICRO_HW.md](docs/CARRY_MICRO_HW.md).
 
 ## Quick start
 

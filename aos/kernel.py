@@ -14,6 +14,7 @@ from aos.manifest import Manifest, ManifestRuntime
 from aos.octopus import as_prompt as octopus_prompt
 from aos.octopus import probe as octopus_probe
 from aos.evolution import EvolutionStore
+from aos.adaptability import AdaptabilityContract
 from aos.host_control import HostControlContract
 from aos.host_probe import as_prompt as host_probe_prompt
 from aos.host_probe import probe_host
@@ -46,6 +47,7 @@ class AgentKernel:
     evolution: EvolutionStore | None = None
     host_control: HostControlContract | None = None
     host_probe: dict[str, Any] = field(default_factory=dict)
+    adaptability: AdaptabilityContract | None = None
 
     @classmethod
     def create(cls, usb_root: Path, manifest_path: Path | None = None) -> "AgentKernel":
@@ -80,6 +82,8 @@ class AgentKernel:
             approval_dir=aos_data / "approvals",
         )
         host_probe_data = probe_host()
+        adaptability = AdaptabilityContract.from_manifest_raw(manifest.raw)
+        adaptability.probe(host_hardware=hardware)
         kernel = cls(
             root=usb_root,
             manifest=manifest,
@@ -92,6 +96,7 @@ class AgentKernel:
             evolution=evolution,
             host_control=host_control,
             host_probe=host_probe_data,
+            adaptability=adaptability,
         )
         kernel.audit_path = aos_data / "audit.jsonl"
         kernel.goals = [
@@ -104,6 +109,7 @@ class AgentKernel:
                 "hardware": hardware,
                 "effective": runtime.effective,
                 "wifi": wifi.status(),
+                "adaptability": adaptability.status(),
                 "axioms": ["offline-first", "permissioned-wifi", "self-evolving-shell"],
             },
         )
@@ -195,11 +201,15 @@ class AgentKernel:
             host_txt = "\n" + self.host_control.context_prompt()
         if self.host_probe:
             host_txt += "\n" + host_probe_prompt(self.host_probe)
+        adapt_txt = ""
+        if self.adaptability:
+            adapt_txt = "\n" + self.adaptability.context_prompt()
         return (
             "# Carry / Pendrive-Native Agent OS (born for USB)\n"
             "Axioms: offline-first · permissioned WiFi · self-evolving shell · Manifest host control.\n"
             "You are the operating system shell. There is no desktop. The avatar is the UI.\n"
-            "Unplugging the USB is intentional shutdown — preserve the soul.\n\n"
+            "Unplugging the USB is intentional shutdown — preserve the soul.\n"
+            "Adapt to power/thermal/display; native RAM is private when on Carry Micro silicon.\n\n"
             + self.runtime.context_prompt()
             + "\n"
             + octopus_prompt(self.hardware)
@@ -208,6 +218,7 @@ class AgentKernel:
             + wifi_txt
             + evo_txt
             + host_txt
+            + adapt_txt
         )
 
     def status(self) -> dict[str, Any]:
@@ -241,4 +252,14 @@ class AgentKernel:
             out["evolution"] = self.evolution.status()
         if self.host_control:
             out["host_control"] = self.host_control.status()
+        if self.adaptability:
+            st = self.adaptability.status()
+            out["adaptability"] = {
+                "board": st.get("board"),
+                "power": st.get("power"),
+                "thermal": st.get("thermal"),
+                "display": st.get("display"),
+                "native_ram": st.get("native_ram"),
+                "behavior": st.get("behavior"),
+            }
         return out

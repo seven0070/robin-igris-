@@ -164,8 +164,8 @@ Offline ops queue to `/queue` and flush when an allowed network appears.
 | Horizon | What |
 |---------|------|
 | **Now (this repo)** | Userspace AOS: offline-first OmniRoute, WiFi Manifest contract, offline queue, evolution checkpoints, Buzz tools, soul seal |
-| **Near** | Live USB session takeover; signed shell snapshots; local llama.cpp bundle on stick |
-| **Far** | Rust microkernel seed; static Hermes rewrite; Airi direct GL; core updates only via second USB |
+| **Near** | Live USB session takeover; signed shell snapshots; local llama.cpp bundle on stick; Carry Micro adaptability on real PMIC/thermal |
+| **Far** | Custom pendrive PCB (native LPDDR + DP Alt + enclave); Rust microkernel seed; static Hermes rewrite; Airi direct GL; core updates only via second USB |
 
 The paradigm: **kernel smallest, agent identity largest.** Every decision asks:
 *does this serve the agent’s persistence and growth?*
@@ -180,6 +180,15 @@ scoped filesystem, allowed apps, computer-use (dry-run by default), terminal
 the agent gets a capability map instead of discovering by trial and error.
 
 See [docs/CARRY_HOST_BRIDGE.md](../CARRY_HOST_BRIDGE.md). Product name for PNAOS: **Carry**.
+
+### Carry Micro Hardware (native RAM)
+
+The stick becomes a **body**, not a filesystem: on-board LPDDR, USB-C PD power
+budgets, thermal throttle, DP Alt Mode / gadget / headless display paths, and
+(eventually) a secure enclave whose keys die if the casing is opened.
+
+Userspace already adapts via Manifest `adaptability` + `:adapt` — see
+[docs/CARRY_MICRO_HW.md](../CARRY_MICRO_HW.md).
 
 Self-evolution needs languages *born* for agents, not ported from app stacks:
 

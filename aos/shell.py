@@ -48,7 +48,7 @@ class AgentShell:
             f"  absent (no stubs)   : {denied}",
             "",
             "  Unplug USB or Ctrl+C = intentional shutdown (soul sealed).",
-            "  :status :soul :goals :buzz :wifi :evolve :host :kairn :flush :quit",
+            "  :status :soul :goals :buzz :wifi :evolve :host :adapt :kairn :flush :quit",
             "",
         ]
         return "\n".join(lines)
@@ -106,6 +106,11 @@ class AgentShell:
                 return host_status()
             except Exception as exc:  # noqa: BLE001
                 return json.dumps({"error": str(exc)})
+        if text == ":adapt":
+            if not self.kernel.adaptability:
+                return json.dumps({"error": "no adaptability contract"})
+            self.kernel.adaptability.refresh(host_hardware=self.kernel.hardware)
+            return json.dumps(self.kernel.adaptability.status(), indent=2, default=str)
         if text == ":wifi":
             if not self.kernel.wifi:
                 return json.dumps({"error": "no wifi contract"})
