@@ -166,6 +166,29 @@ def novel_forward(query: str) -> str:
     return _ok(_novel().forward(query))
 
 
+def _pne():
+    root = Path(os.getenv("ROBIN_USB_ROOT") or os.getenv("AOS_USB_ROOT") or ".")
+    from robin_igris.pendrive_native import PendriveNativeModel
+
+    return PendriveNativeModel.create(root)
+
+
+def pne_status() -> str:
+    return _ok(_pne().status())
+
+
+def pne_ask(text: str) -> str:
+    return _ok(_pne().ask(text))
+
+
+def pne_idle() -> str:
+    return _ok(_pne().idle())
+
+
+def pne_overnight() -> str:
+    return _ok(_pne().consolidate())
+
+
 TOOL_IMPLS: dict[str, Callable[..., str]] = {
     "intel_status": intel_status,
     "paper_ingest": paper_ingest,
@@ -180,6 +203,10 @@ TOOL_IMPLS: dict[str, Callable[..., str]] = {
     "lived_teach": lived_teach,
     "novel_status": novel_status,
     "novel_forward": novel_forward,
+    "pne_status": pne_status,
+    "pne_ask": pne_ask,
+    "pne_idle": pne_idle,
+    "pne_overnight": pne_overnight,
 }
 
 TOOL_SCHEMAS: list[dict[str, Any]] = [
@@ -341,6 +368,42 @@ TOOL_SCHEMAS: list[dict[str, Any]] = [
                 "properties": {"query": {"type": "string"}},
                 "required": ["query"],
             },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "pne_status",
+            "description": "Pendrive-native engine status (thin core + SQLite PAM graph + metabolism).",
+            "parameters": {"type": "object", "properties": {}},
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "pne_ask",
+            "description": "Ask the pendrive-native engine — finds in graph or says it does not know yet.",
+            "parameters": {
+                "type": "object",
+                "properties": {"text": {"type": "string"}},
+                "required": ["text"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "pne_idle",
+            "description": "Run idle-phase metabolism (~10 mW class silent replay).",
+            "parameters": {"type": "object", "properties": {}},
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "pne_overnight",
+            "description": "Run overnight consolidation (~1 W class prune/promote/abstract).",
+            "parameters": {"type": "object", "properties": {}},
         },
     },
 ]

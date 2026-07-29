@@ -74,6 +74,10 @@ DEFAULT_MANIFEST = {
         "lived_teach": True,
         "novel_status": True,
         "novel_forward": True,
+        "pne_status": True,
+        "pne_ask": True,
+        "pne_idle": True,
+        "pne_overnight": True,
     },
     "host_control": {
         "enabled": False,
@@ -174,6 +178,12 @@ DEFAULT_MANIFEST = {
         ],
         "note": "Not a next-token LLM variant — five different mechanisms unified for the pendrive.",
     },
+    "pendrive_native": {
+        "enabled": True,
+        "engine_params_m": 50,
+        "layers": ["thin_engine", "pam_graph_sqlite", "metabolism"],
+        "note": "Hardware-up model for NPU/LPDDR/eMMC/USB watts — find, don't guess.",
+    },
     "wifi": {
         "default": "deny",
         "networks": [
@@ -259,6 +269,7 @@ class Manifest:
             "intelligence",
             "lived_seed",
             "novel_llm",
+            "pendrive_native",
         ):
             if self.raw.get(key) is not None:
                 payload[key] = self.raw[key]

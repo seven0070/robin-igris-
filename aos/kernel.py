@@ -51,6 +51,7 @@ class AgentKernel:
     intelligence: Any | None = None
     lived_seed: Any | None = None
     novel_llm: Any | None = None
+    pendrive_native: Any | None = None
 
     @classmethod
     def create(cls, usb_root: Path, manifest_path: Path | None = None) -> "AgentKernel":
@@ -114,6 +115,13 @@ class AgentKernel:
             soul=soul,
             enabled=bool(novel_cfg.get("enabled", True)),
         )
+        pne_cfg = (manifest.raw or {}).get("pendrive_native") or {}
+        from robin_igris.pendrive_native import PendriveNativeModel
+
+        pendrive_native = PendriveNativeModel.create(
+            usb_root,
+            enabled=bool(pne_cfg.get("enabled", True)),
+        )
         kernel = cls(
             root=usb_root,
             manifest=manifest,
@@ -130,6 +138,7 @@ class AgentKernel:
             intelligence=intelligence,
             lived_seed=lived_seed,
             novel_llm=novel_llm,
+            pendrive_native=pendrive_native,
         )
         kernel.audit_path = aos_data / "audit.jsonl"
         kernel.goals = [
@@ -145,6 +154,7 @@ class AgentKernel:
                 "adaptability": adaptability.status(),
                 "lived_seed": lived_seed.status(),
                 "novel_llm": novel_llm.status(),
+                "pendrive_native": pendrive_native.status(),
                 "axioms": ["offline-first", "permissioned-wifi", "self-evolving-shell"],
             },
         )
@@ -248,6 +258,9 @@ class AgentKernel:
         novel_txt = ""
         if self.novel_llm and getattr(self.novel_llm, "enabled", True):
             novel_txt = "\n" + self.novel_llm.context_prompt()
+        pne_txt = ""
+        if self.pendrive_native and getattr(self.pendrive_native, "enabled", True):
+            pne_txt = "\n" + self.pendrive_native.context_prompt()
         return (
             "# Carry / Pendrive-Native Agent OS (born for USB)\n"
             "Axioms: offline-first · permissioned WiFi · self-evolving shell · Manifest host control.\n"
@@ -257,7 +270,8 @@ class AgentKernel:
             "Intelligence = local uncensored model + paper/PAM graph + Kairn skills + fine-tune curation;\n"
             "cloud spillover only when Manifest/WiFi allow.\n"
             "Lived Seed = blank experience learner (Hebbian/STDP/sleep) growing beside OmniRoute.\n"
-            "Novel LLM hybrid = Memory-as-Compute · Living Weights · Program-Synthesis · World Model · Sleep.\n\n"
+            "Novel LLM hybrid = Memory-as-Compute · Living Weights · Program-Synthesis · World Model · Sleep.\n"
+            "Pendrive-native engine = thin traversal core + SQLite PAM graph + metabolic plasticity.\n\n"
             + self.runtime.context_prompt()
             + "\n"
             + octopus_prompt(self.hardware)
@@ -270,6 +284,7 @@ class AgentKernel:
             + intel_txt
             + seed_txt
             + novel_txt
+            + pne_txt
         )
 
     def status(self) -> dict[str, Any]:
@@ -332,5 +347,11 @@ class AgentKernel:
                 "architecture": "novel-hybrid-v0",
                 "verified_skills": len(self.novel_llm.skills.list_verified()),
                 "enabled": self.novel_llm.enabled,
+            }
+        if self.pendrive_native:
+            out["pendrive_native"] = {
+                "architecture": "pendrive-native-v0",
+                "counts": self.pendrive_native.store.counts(),
+                "blank": self.pendrive_native.status().get("blank"),
             }
         return out

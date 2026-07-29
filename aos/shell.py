@@ -48,7 +48,7 @@ class AgentShell:
             f"  absent (no stubs)   : {denied}",
             "",
             "  Unplug USB or Ctrl+C = intentional shutdown (soul sealed).",
-            "  :status :soul :goals :buzz :wifi :evolve :host :adapt :intel :papers :seed :sleep :novel :kairn :flush :quit",
+            "  :status :soul :goals :buzz :wifi :evolve :host :adapt :intel :papers :seed :sleep :novel :pne :kairn :flush :quit",
             "",
         ]
         return "\n".join(lines)
@@ -148,6 +148,19 @@ class AgentShell:
                 return json.dumps({"error": "no novel llm"})
             q = text[len(":novel ") :].strip()
             return json.dumps(self.kernel.novel_llm.forward(q), indent=2, default=str)
+        if text == ":pne":
+            if not self.kernel.pendrive_native:
+                return json.dumps({"error": "no pendrive-native engine"})
+            return json.dumps(self.kernel.pendrive_native.status(), indent=2, default=str)
+        if text.startswith(":pne "):
+            if not self.kernel.pendrive_native:
+                return json.dumps({"error": "no pendrive-native engine"})
+            q = text[len(":pne ") :].strip()
+            if q == "idle":
+                return json.dumps(self.kernel.pendrive_native.idle(), indent=2, default=str)
+            if q == "overnight":
+                return json.dumps(self.kernel.pendrive_native.consolidate(), indent=2, default=str)
+            return json.dumps(self.kernel.pendrive_native.ask(q), indent=2, default=str)
         if text == ":wifi":
             if not self.kernel.wifi:
                 return json.dumps({"error": "no wifi contract"})
