@@ -36,16 +36,17 @@ Format **exFAT** (Win/macOS/Linux) or **NTFS** (Windows-only).
 # Windows: .\scripts\prepare-usb.ps1 E:\ROBIN_IGRIS
 ```
 
-Edit `USB/ROBIN_IGRIS/.env` (API keys). Eject.
+Edit `USB/ROBIN_IGRIS/.env` (API keys — OmniRoute + optional `XAI_API_KEY` for Grok Build). Eject.
 
 ## Daily use
 
 **Agent OS mode (recommended for the “OS on a stick” vision):**
 1. Plug in USB
 2. Ensure OmniRoute is available on the host (`npm i -g omniroute`) — LAUNCH starts it
-3. Double-click **`AOS_BOOT.bat`** (Windows) or run **`./aos-boot.sh`**
-4. Avatar / CLI shell talks through OmniRoute (`:20128`)
-5. Ctrl+C or STOP → soul seals → eject (unplug = intentional shutdown)
+3. Optional coding sidecar: `./scripts/install-grok-build.sh` then set `XAI_API_KEY`
+4. Double-click **`AOS_BOOT.bat`** (Windows) or run **`./aos-boot.sh`**
+5. Avatar / CLI shell: `:robin` (mind) · `:grok` (coding sidecar)
+6. Ctrl+C or STOP → soul seals → eject (unplug = intentional shutdown)
 
 **Companion mode:** `LAUNCH.bat` / `launch.sh` (starts OmniRoute + voice + Live2D).
 

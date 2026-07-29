@@ -16,7 +16,7 @@ from robin_igris.tools import TOOL_IMPLS, run_tool
 def test_capability_ranks_coding_above_local_when_online(tmp_path: Path):
     cm = CapabilityModel.load(tmp_path / "caps")
     ranked = cm.rank("coding", allow_cloud=True)
-    assert ranked[0]["id"] in {"coding", "reasoning", "auto"}
+    assert ranked[0]["id"] in {"coding", "reasoning", "auto", "grok-build"}
     assert any(r["id"] == "local" for r in ranked)
 
 

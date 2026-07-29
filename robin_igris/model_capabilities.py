@@ -45,6 +45,15 @@ DEFAULT_CATALOG: list[dict[str, Any]] = [
         "notes": "Best for code/refactor/debug when online.",
     },
     {
+        "id": "grok-build",
+        "label": "Grok Build (xAI coding agent)",
+        "online": True,
+        "privacy": "cloud",
+        "uncensored": False,
+        "strengths": {"speed": 0.5, "privacy": 0.25, "coding": 0.98, "reasoning": 0.75, "math": 0.55, "longctx": 0.65, "vision": 0.2, "writing": 0.5},
+        "notes": "SpaceXAI grok CLI — prefer for deep codebase edits when installed (GROK / XAI_API_KEY).",
+    },
+    {
         "id": "reasoning",
         "label": "Long reasoning route",
         "online": True,

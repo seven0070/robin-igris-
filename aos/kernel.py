@@ -262,6 +262,14 @@ class AgentKernel:
         pne_txt = ""
         if self.pendrive_native and getattr(self.pendrive_native, "enabled", True):
             pne_txt = "\n" + self.pendrive_native.context_prompt()
+        grok_txt = ""
+        try:
+            from robin_igris.grok_build import GrokBuildClient
+
+            if (self.manifest.raw or {}).get("grok_build", {}).get("enabled", True):
+                grok_txt = "\n" + GrokBuildClient.detect().context_prompt()
+        except Exception:
+            pass
         return (
             "# Carry / Pendrive-Native Agent OS (born for USB)\n"
             "Axioms: offline-first · permissioned WiFi · self-evolving shell · Manifest host control.\n"
@@ -272,7 +280,8 @@ class AgentKernel:
             "cloud spillover only when Manifest/WiFi allow.\n"
             "Lived Seed = blank experience learner (Hebbian/STDP/sleep) growing beside OmniRoute.\n"
             "Novel LLM hybrid = Memory-as-Compute · Living Weights · Program-Synthesis · World Model · Sleep.\n"
-            "Pendrive-native engine = **Robin** — thin traversal core + SQLite PAM graph + metabolic plasticity.\n\n"
+            "Pendrive-native engine = **Robin** — thin traversal core + SQLite PAM graph + metabolic plasticity.\n"
+            "Grok Build = optional coding sidecar (xai-org/grok-build) via `grok` CLI / `:grok`.\n\n"
             + self.runtime.context_prompt()
             + "\n"
             + octopus_prompt(self.hardware)
@@ -286,6 +295,7 @@ class AgentKernel:
             + seed_txt
             + novel_txt
             + pne_txt
+            + grok_txt
         )
 
     def status(self) -> dict[str, Any]:

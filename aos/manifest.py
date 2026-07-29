@@ -82,6 +82,9 @@ DEFAULT_MANIFEST = {
         "robin_ask": True,
         "robin_idle": True,
         "robin_overnight": True,
+        "grok_status": True,
+        "grok_ask": True,
+        "grok_code": True,
     },
     "host_control": {
         "enabled": False,
@@ -195,6 +198,12 @@ DEFAULT_MANIFEST = {
         "layers": ["thin_engine", "pam_graph_sqlite", "metabolism"],
         "note": "Robin — pendrive-native mind. Carry is the OS; Robin is the mind on the stick.",
     },
+    "grok_build": {
+        "enabled": True,
+        "repo": "https://github.com/xai-org/grok-build.git",
+        "role": "coding_sidecar",
+        "note": "Grok Build TUI/headless coder — install grok CLI; auth via XAI_API_KEY",
+    },
     "wifi": {
         "default": "deny",
         "networks": [
@@ -282,6 +291,7 @@ class Manifest:
             "novel_llm",
             "pendrive_native",
             "robin",
+            "grok_build",
         ):
             if self.raw.get(key) is not None:
                 payload[key] = self.raw[key]

@@ -117,11 +117,24 @@ cp "$ROOT_REPO/docs/research/USB_LAYOUT.md" "$DEST/USB_LAYOUT.md" 2>/dev/null ||
 echo "==> Initializing AOS soul"
 PYTHONPATH="$DEST/app" "$DEST/runtime/venv/bin/python" -m aos init --root "$DEST" || true
 
+echo "==> Grok Build coding sidecar notes"
+mkdir -p "$DEST/bin" "$DEST/docs"
+cp "$ROOT_REPO/docs/GROK_BUILD.md" "$DEST/docs/GROK_BUILD.md" 2>/dev/null || true
+cat > "$DEST/bin/README-GROK.txt" <<'EOF'
+Grok Build (optional coding sidecar)
+  Install: curl -fsSL https://x.ai/cli/install.sh | bash
+  Or:      ./app/scripts/install-grok-build.sh
+  Auth:    XAI_API_KEY=xai-... in .env
+  Use:     :grok  in AOS shell
+  Repo:    https://github.com/xai-org/grok-build
+EOF
+
 echo ""
 echo "USB kit ready at: $DEST"
 echo "Next:"
-echo "  1) Edit $DEST/.env (API keys)"
-echo "  2) Eject safely"
-echo "  3) Companion: LAUNCH.bat / launch.sh"
-echo "  4) Agent OS:  AOS_BOOT.bat / aos-boot.sh"
+echo "  1) Edit $DEST/.env (API keys — include XAI_API_KEY for Grok Build)"
+echo "  2) Optional: ./scripts/install-grok-build.sh"
+echo "  3) Eject safely"
+echo "  4) Companion: LAUNCH.bat / launch.sh"
+echo "  5) Agent OS:  AOS_BOOT.bat / aos-boot.sh  →  :robin  /  :grok"
 du -sh "$DEST" 2>/dev/null || true
