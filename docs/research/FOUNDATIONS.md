@@ -1,7 +1,8 @@
 # Research foundations for Robin Igris
 
 Robin Igris combines recent work on **persistent / open-world / delivery-reliable agents**
-with Hermes (brain) and AIRI (body).
+with OmniRoute (LLM), optional Hermes (tools), AIRI (body), and
+**[Pendrive-Native Agent OS](PNAOS_PAPER.md)** (agent-as-OS composition).
 
 | Paper | Core idea | What we take |
 |-------|-----------|--------------|
