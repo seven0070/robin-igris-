@@ -96,29 +96,46 @@ class AgentShell:
             except PermissionError as exc:
                 return f"capability {name!r}: denied — {exc}"
 
-        # Default: treat as agent utterance — OmniRoute LLM when available.
+        # Default: OmniRoute with offline-first routing (local when no WAN).
         self.kernel.soul.append("episodic", f"user: {text}", meta={"role": "user"})
-        try:
-            self.kernel.runtime.require("network")
-            from robin_igris.omniroute import chat_text
+        caps = self.kernel.runtime.effective
+        if not (caps.get("local_llm") or caps.get("network")):
+            tip = self.kernel.soul.tip().get("merkle_root", "")[:12]
+            reply = f"[AOS] No LLM capability in capsule. tip={tip}…"
+            self.kernel.soul.append("episodic", f"assistant: {reply}", meta={"role": "assistant"})
+            return reply
 
-            ctx = self.kernel.boot_context()
+        try:
+            from robin_igris.omniroute import chat_text
+            from robin_igris.routing import from_capsule, routing_context
+
+            budget = None
+            raw_budget = (self.kernel.manifest.raw or {}).get("budget") or {}
+            if "balance_usd" in raw_budget:
+                budget = float(raw_budget["balance_usd"])
+            decision = from_capsule(
+                caps,
+                user_text=text,
+                budget_usd=budget,
+                manifest_raw=self.kernel.manifest.raw,
+            )
+            ctx = self.kernel.boot_context() + "\n" + routing_context(decision)
             reply = chat_text(
                 [
                     {"role": "system", "content": ctx},
                     {"role": "user", "content": text},
-                ]
+                ],
+                route=decision,
             ).strip() or "(empty OmniRoute reply)"
-        except PermissionError:
-            tip = self.kernel.soul.tip().get("merkle_root", "")[:12]
-            reply = (
-                f"[AOS] Network capability absent — recorded only. tip={tip}…"
+            self.kernel.audit(
+                "llm_route",
+                {"mode": decision.mode, "model": decision.model, "reason": decision.reason},
             )
         except Exception as exc:  # noqa: BLE001
             tip = self.kernel.soul.tip().get("merkle_root", "")[:12]
             reply = (
                 f"[AOS] OmniRoute unreachable ({exc}). Soul tip={tip}…. "
-                "Start OmniRoute on :20128 or check :status."
+                "Start OmniRoute on :20128; for offline, register a local provider."
             )
         self.kernel.soul.append("episodic", f"assistant: {reply}", meta={"role": "assistant"})
         return reply

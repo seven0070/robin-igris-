@@ -18,7 +18,7 @@ You ──voice/chat──▶ Companion (AIRI Live2D)
 
 | Layer | Source | Role |
 |-------|--------|------|
-| **LLM** | [OmniRoute](https://github.com/diegosouzapw/OmniRoute) | One endpoint, 290+ providers, auto-fallback |
+| **LLM** | [OmniRoute](https://github.com/diegosouzapw/OmniRoute) | Offline-first router: local 3–7B + cloud spillover |
 | **System 3** | [OpenLife](https://www.alphaxiv.org/abs/2606.31046), [Sophia](https://www.alphaxiv.org/abs/2512.18202), [OpenSkill](https://www.alphaxiv.org/abs/2606.06741), [Channel Fracture / CADVP](https://www.alphaxiv.org/abs/2606.04896v2) | Persistence, skills, **delivery verification** |
 | **Tools (opt.)** | [Hermes Agent](https://github.com/NousResearch/hermes-agent) | Optional tools/memory hub |
 | **Body** | [Project AIRI](https://github.com/moeru-ai/airi) | Live2D avatar + voice presence |

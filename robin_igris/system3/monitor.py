@@ -128,11 +128,24 @@ class ExecutiveMonitor:
     def _chat(self, messages: list[dict], chat_fn: Any | None) -> str:
         if chat_fn is not None:
             return chat_fn(messages)
-        # Primary LLM: OmniRoute (https://github.com/diegosouzapw/OmniRoute)
+        # Primary LLM: OmniRoute with offline-first routing
         try:
             from robin_igris.omniroute import chat_text
+            from robin_igris.octopus_net import has_network
+            from robin_igris.routing import resolve_route
 
-            return chat_text(messages)
+            user = ""
+            for m in reversed(messages):
+                if m.get("role") == "user":
+                    user = str(m.get("content") or "")
+                    break
+            online = has_network()
+            decision = resolve_route(
+                has_network=online,
+                user_text=user,
+                budget_usd=self.metabolism.balance_usd,
+            )
+            return chat_text(messages, route=decision)
         except Exception as exc:  # noqa: BLE001
             try:
                 from robin_igris.hermes_client import chat as hermes_chat

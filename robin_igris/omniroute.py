@@ -3,7 +3,8 @@
 https://github.com/diegosouzapw/OmniRoute
 
 OpenAI-compatible endpoint (default): http://127.0.0.1:20128/v1
-Model ``auto`` uses OmniRoute's quota-aware fallback across free/paid providers.
+Routing is offline-first: local model when no network / low budget;
+cloud spillover via OmniRoute ``auto`` (or task aliases) when online.
 """
 
 from __future__ import annotations
@@ -12,6 +13,8 @@ import os
 from typing import Any
 
 import httpx
+
+from robin_igris.routing import RouteDecision, resolve_route
 
 DEFAULT_BASE = "http://127.0.0.1:20128/v1"
 DEFAULT_MODEL = "auto"
@@ -71,10 +74,25 @@ def chat_text(
     model_name: str | None = None,
     temperature: float = 0.4,
     timeout: float = 120.0,
+    route: RouteDecision | None = None,
+    has_network: bool | None = None,
 ) -> str:
-    """Simple chat completions → assistant content string."""
+    """Chat completions via OmniRoute, optionally with a RouteDecision."""
+    if model_name is None:
+        if route is not None:
+            model_name = route.model
+        elif has_network is not None:
+            user = ""
+            for m in reversed(messages):
+                if m.get("role") == "user":
+                    user = str(m.get("content") or "")
+                    break
+            model_name = resolve_route(has_network=has_network, user_text=user).model
+        else:
+            model_name = model()
+
     payload = {
-        "model": model_name or model(),
+        "model": model_name,
         "messages": messages,
         "temperature": temperature,
     }

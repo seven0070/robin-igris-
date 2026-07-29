@@ -27,6 +27,18 @@ DEFAULT_MANIFEST = {
         "shell_exec": False,
         "camera": False,
         "gpu": False,
+        "local_llm": True,
+    },
+    "budget": {
+        "balance_usd": 5.0,
+        "daily_allowance_usd": 1.0,
+        "cloud_min_usd": 0.05,
+    },
+    "routing": {
+        "force_local": False,
+        "prefer_cloud": False,
+        "offline_model": "local",
+        "online_model": "auto",
     },
     "goals": [
         {"id": "presence", "text": "Remain available to the user via avatar shell"},
@@ -82,6 +94,10 @@ class Manifest:
             "capabilities": self.capabilities,
             "goals": self.goals,
         }
+        if self.raw.get("budget") is not None:
+            payload["budget"] = self.raw["budget"]
+        if self.raw.get("routing") is not None:
+            payload["routing"] = self.raw["routing"]
         if path.suffix in {".yaml", ".yml"} and yaml is not None:
             path.write_text(yaml.safe_dump(payload, sort_keys=False), encoding="utf-8")
         else:
@@ -114,6 +130,8 @@ class ManifestRuntime:
             "shell_exec": m.get("shell_exec", False),
             "camera": m.get("camera", False) and bool(hw.get("has_camera", False)),
             "gpu": m.get("gpu", False) and bool(hw.get("has_gpu", False)),
+            # Local LLM does not require WAN — OmniRoute → Ollama/llama.cpp on stick/host
+            "local_llm": m.get("local_llm", True),
         }
         self.effective = gated
         return gated

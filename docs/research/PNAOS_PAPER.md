@@ -172,7 +172,18 @@ At boot, emit structured hardware context (CPU, RAM, displays, audio, net, GPU) 
 | Unplug / SIGTERM | Flush journal, seal Merkle tip, optional CADVP confirm |
 | Replug on new PC | Rehydrate soul, re-probe, continue |
 
-### 4.8 Honesty bound (kernel vs metaphor)
+### 4.8 LLM routing (OmniRoute)
+
+Pendrive compute is limited. PNAOS does **not** hardcode a single model. It uses
+[OmniRoute](https://github.com/diegosouzapw/OmniRoute) as an offline-first router:
+
+- **No network / low Manifest budget** → local 3–7B (via OmniRoute local provider)
+- **Online spillover** → reasoning / code / long-context / cheap-batch aliases
+- **Dynamic discovery** → providers and keys change with the borrowed host; the router adapts
+
+See `docs/OMNIROUTE.md` and `robin_igris/routing.py`.
+
+### 4.9 Honesty bound (kernel vs metaphor)
 
 A full replacement of Linux/Windows kernels is out of scope for the reference system. PNAOS is specified as a **userspace Agent OS** that:
 
