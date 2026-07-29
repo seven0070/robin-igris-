@@ -44,7 +44,7 @@ class AgentShell:
             f"  absent (no stubs)   : {denied}",
             "",
             "  Unplug USB or Ctrl+C = intentional shutdown (soul sealed).",
-            "  Type a message, or :status / :soul / :goals / :quit",
+            "  Type a message, or :status / :soul / :goals / :buzz / :quit",
             "",
         ]
         return "\n".join(lines)
@@ -88,6 +88,13 @@ class AgentShell:
             return self.format_soul()
         if text == ":goals":
             return self.format_goals()
+        if text == ":buzz":
+            try:
+                from robin_igris.buzz.tools import buzz_status
+
+                return buzz_status()
+            except Exception as exc:  # noqa: BLE001
+                return json.dumps({"error": str(exc)})
         if text.startswith(":cap "):
             name = text[5:].strip()
             try:

@@ -28,6 +28,7 @@ DEFAULT_MANIFEST = {
         "camera": False,
         "gpu": False,
         "local_llm": True,
+        "buzz": True,
     },
     "budget": {
         "balance_usd": 5.0,
@@ -40,10 +41,23 @@ DEFAULT_MANIFEST = {
         "offline_model": "local",
         "online_model": "auto",
     },
+    "tools": {
+        "buzz_status": True,
+        "buzz_list_channels": True,
+        "buzz_list_tasks": True,
+        "buzz_read_thread": True,
+        "buzz_send_message": True,
+        "buzz_complete_task": True,
+        "buzz_upload_artifact": True,
+        "buzz_request_human_input": True,
+        "buzz_search": True,
+        "buzz_feed": True,
+    },
     "goals": [
         {"id": "presence", "text": "Remain available to the user via avatar shell"},
         {"id": "continuity", "text": "Preserve soul across unplug/replug"},
         {"id": "honesty", "text": "Never invent tool results; declare capability gaps"},
+        {"id": "buzz", "text": "Collaborate with humans in the buzz.xyz shared workspace"},
     ],
 }
 
@@ -94,10 +108,9 @@ class Manifest:
             "capabilities": self.capabilities,
             "goals": self.goals,
         }
-        if self.raw.get("budget") is not None:
-            payload["budget"] = self.raw["budget"]
-        if self.raw.get("routing") is not None:
-            payload["routing"] = self.raw["routing"]
+        for key in ("budget", "routing", "tools"):
+            if self.raw.get(key) is not None:
+                payload[key] = self.raw[key]
         if path.suffix in {".yaml", ".yml"} and yaml is not None:
             path.write_text(yaml.safe_dump(payload, sort_keys=False), encoding="utf-8")
         else:
@@ -132,9 +145,23 @@ class ManifestRuntime:
             "gpu": m.get("gpu", False) and bool(hw.get("has_gpu", False)),
             # Local LLM does not require WAN — OmniRoute → Ollama/llama.cpp on stick/host
             "local_llm": m.get("local_llm", True),
+            # Buzz shared workspace — needs network + Manifest.buzz
+            "buzz": m.get("buzz", False) and bool(hw.get("has_network", False)),
         }
         self.effective = gated
         return gated
+
+    def allows_tool(self, tool_name: str) -> bool:
+        """Logic Shutter: tool must be listed in Manifest.tools (default deny if tools map set)."""
+        tools = (self.manifest.raw or {}).get("tools")
+        if tools is None:
+            # Legacy manifests: buzz_* tools require buzz capability
+            if tool_name.startswith("buzz_"):
+                return bool(self.effective.get("buzz", False))
+            return True
+        if tool_name.startswith("buzz_") and not self.effective.get("buzz", False):
+            return False
+        return bool(tools.get(tool_name, False))
 
     def require(self, capability: str) -> None:
         if not self.effective.get(capability, False):

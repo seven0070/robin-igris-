@@ -166,12 +166,18 @@ def recall_notes() -> str:
     return json.dumps({"notes": notes, "count": len(notes)})
 
 
+# Buzz.xyz shared workspace tools (Manifest-gated)
+from robin_igris.buzz.tools import TOOL_IMPLS as _BUZZ_IMPLS  # noqa: E402
+from robin_igris.buzz.tools import TOOL_SCHEMAS as _BUZZ_SCHEMAS  # noqa: E402
+
+
 TOOL_IMPLS: dict[str, Callable[..., str]] = {
     "calculator": calculator,
     "get_current_time": get_current_time,
     "web_search": web_search,
     "remember_note": remember_note,
     "recall_notes": recall_notes,
+    **_BUZZ_IMPLS,
 }
 
 TOOL_SCHEMAS: list[dict[str, Any]] = [
@@ -252,6 +258,8 @@ TOOL_SCHEMAS: list[dict[str, Any]] = [
     },
 ]
 
+TOOL_SCHEMAS.extend(_BUZZ_SCHEMAS)
+
 
 def run_tool(name: str, arguments: dict[str, Any] | str) -> str:
     if isinstance(arguments, str):
@@ -259,6 +267,12 @@ def run_tool(name: str, arguments: dict[str, Any] | str) -> str:
             arguments = json.loads(arguments or "{}")
         except json.JSONDecodeError:
             arguments = {}
+    if name.startswith("buzz_"):
+        from robin_igris.buzz.gate import require_buzz_tool
+
+        denied = require_buzz_tool(name)
+        if denied:
+            return denied
     fn = TOOL_IMPLS.get(name)
     if not fn:
         return json.dumps({"error": f"Unknown tool: {name}"})
