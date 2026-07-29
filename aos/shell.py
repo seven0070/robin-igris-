@@ -48,7 +48,7 @@ class AgentShell:
             f"  absent (no stubs)   : {denied}",
             "",
             "  Unplug USB or Ctrl+C = intentional shutdown (soul sealed).",
-            "  :status :soul :goals :buzz :wifi :evolve :host :adapt :intel :papers :seed :sleep :kairn :flush :quit",
+            "  :status :soul :goals :buzz :wifi :evolve :host :adapt :intel :papers :seed :sleep :novel :kairn :flush :quit",
             "",
         ]
         return "\n".join(lines)
@@ -139,6 +139,15 @@ class AgentShell:
             if not self.kernel.lived_seed:
                 return json.dumps({"error": "no lived seed"})
             return json.dumps(self.kernel.lived_seed.sleep(), indent=2, default=str)
+        if text == ":novel":
+            if not self.kernel.novel_llm:
+                return json.dumps({"error": "no novel llm"})
+            return json.dumps(self.kernel.novel_llm.status(), indent=2, default=str)
+        if text.startswith(":novel "):
+            if not self.kernel.novel_llm:
+                return json.dumps({"error": "no novel llm"})
+            q = text[len(":novel ") :].strip()
+            return json.dumps(self.kernel.novel_llm.forward(q), indent=2, default=str)
         if text == ":wifi":
             if not self.kernel.wifi:
                 return json.dumps({"error": "no wifi contract"})

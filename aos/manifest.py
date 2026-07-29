@@ -72,6 +72,8 @@ DEFAULT_MANIFEST = {
         "lived_ask": True,
         "lived_sleep": True,
         "lived_teach": True,
+        "novel_status": True,
+        "novel_forward": True,
     },
     "host_control": {
         "enabled": False,
@@ -160,6 +162,18 @@ DEFAULT_MANIFEST = {
         "mechanism": "hebbian+stdp+consolidation",
         "note": "Blank experience learner — not backprop. OmniRoute answers now; seed grows uniquely.",
     },
+    "novel_llm": {
+        "enabled": True,
+        "architecture": "hybrid",
+        "directions": [
+            "memory-as-compute",
+            "living-weights",
+            "program-synthesis",
+            "predictive-world-model",
+            "overnight-consolidation",
+        ],
+        "note": "Not a next-token LLM variant — five different mechanisms unified for the pendrive.",
+    },
     "wifi": {
         "default": "deny",
         "networks": [
@@ -244,6 +258,7 @@ class Manifest:
             "adaptability",
             "intelligence",
             "lived_seed",
+            "novel_llm",
         ):
             if self.raw.get(key) is not None:
                 payload[key] = self.raw[key]

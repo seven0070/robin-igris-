@@ -133,6 +133,39 @@ def lived_teach(user_text: str, fact: str, outcome: str = "user_satisfied") -> s
     return _ok({"taught": exp.id, "concepts": exp.linked_concepts, "novelty": exp.novelty})
 
 
+def _novel():
+    root = Path(os.getenv("ROBIN_USB_ROOT") or os.getenv("AOS_USB_ROOT") or ".")
+    from robin_igris.lived_seed import LivedSeed
+    from robin_igris.novel_llm import NovelLLM
+
+    seed = LivedSeed.create(root)
+    papers = None
+    soul = None
+    try:
+        from robin_igris.intelligence import IntelligenceStack
+
+        stack = IntelligenceStack.create(root)
+        papers = stack.papers
+    except Exception:
+        pass
+    try:
+        from aos.kernel import AgentKernel
+
+        if os.getenv("ROBIN_USB_ROOT") or os.getenv("AOS_USB_ROOT"):
+            soul = AgentKernel.create(root).soul
+    except Exception:
+        pass
+    return NovelLLM.create(root, seed=seed, papers=papers, soul=soul)
+
+
+def novel_status() -> str:
+    return _ok(_novel().status())
+
+
+def novel_forward(query: str) -> str:
+    return _ok(_novel().forward(query))
+
+
 TOOL_IMPLS: dict[str, Callable[..., str]] = {
     "intel_status": intel_status,
     "paper_ingest": paper_ingest,
@@ -145,6 +178,8 @@ TOOL_IMPLS: dict[str, Callable[..., str]] = {
     "lived_ask": lived_ask,
     "lived_sleep": lived_sleep,
     "lived_teach": lived_teach,
+    "novel_status": novel_status,
+    "novel_forward": novel_forward,
 }
 
 TOOL_SCHEMAS: list[dict[str, Any]] = [
@@ -285,6 +320,26 @@ TOOL_SCHEMAS: list[dict[str, Any]] = [
                     "outcome": {"type": "string", "default": "user_satisfied"},
                 },
                 "required": ["user_text", "fact"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "novel_status",
+            "description": "Status of the Novel LLM hybrid (not next-token architecture).",
+            "parameters": {"type": "object", "properties": {}},
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "novel_forward",
+            "description": "Run one Novel LLM forward pass: memory-as-compute + world-model action + living weights.",
+            "parameters": {
+                "type": "object",
+                "properties": {"query": {"type": "string"}},
+                "required": ["query"],
             },
         },
     },

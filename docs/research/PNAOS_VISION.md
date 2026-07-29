@@ -206,6 +206,12 @@ consolidation, not gradient descent on internet text. OmniRoute answers now;
 the seed grows uniquely on the pendrive. See [docs/LIVED_SEED.md](../LIVED_SEED.md).
 Shell: `:seed` · `:sleep`.
 
+### Novel LLM (hybrid — different way entirely)
+
+Not a smaller transformer. Five mechanisms unified: Memory-as-Compute, Living
+Weights, Program-Synthesis, Predictive World Model, Overnight consolidation.
+See [docs/NOVEL_LLM.md](../NOVEL_LLM.md). Shell: `:novel <query>`.
+
 Self-evolution needs languages *born* for agents, not ported from app stacks:
 
 | Language | Role |

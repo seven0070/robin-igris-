@@ -50,6 +50,7 @@ class AgentKernel:
     adaptability: AdaptabilityContract | None = None
     intelligence: Any | None = None
     lived_seed: Any | None = None
+    novel_llm: Any | None = None
 
     @classmethod
     def create(cls, usb_root: Path, manifest_path: Path | None = None) -> "AgentKernel":
@@ -103,6 +104,16 @@ class AgentKernel:
             enabled=bool(lived_cfg.get("enabled", True)),
             dual_track=bool(lived_cfg.get("dual_track", True)),
         )
+        novel_cfg = (manifest.raw or {}).get("novel_llm") or {}
+        from robin_igris.novel_llm import NovelLLM
+
+        novel_llm = NovelLLM.create(
+            usb_root,
+            seed=lived_seed,
+            papers=intelligence.papers if intelligence else None,
+            soul=soul,
+            enabled=bool(novel_cfg.get("enabled", True)),
+        )
         kernel = cls(
             root=usb_root,
             manifest=manifest,
@@ -118,6 +129,7 @@ class AgentKernel:
             adaptability=adaptability,
             intelligence=intelligence,
             lived_seed=lived_seed,
+            novel_llm=novel_llm,
         )
         kernel.audit_path = aos_data / "audit.jsonl"
         kernel.goals = [
@@ -132,6 +144,7 @@ class AgentKernel:
                 "wifi": wifi.status(),
                 "adaptability": adaptability.status(),
                 "lived_seed": lived_seed.status(),
+                "novel_llm": novel_llm.status(),
                 "axioms": ["offline-first", "permissioned-wifi", "self-evolving-shell"],
             },
         )
@@ -232,6 +245,9 @@ class AgentKernel:
         seed_txt = ""
         if self.lived_seed and getattr(self.lived_seed, "enabled", True):
             seed_txt = "\n" + self.lived_seed.context_prompt()
+        novel_txt = ""
+        if self.novel_llm and getattr(self.novel_llm, "enabled", True):
+            novel_txt = "\n" + self.novel_llm.context_prompt()
         return (
             "# Carry / Pendrive-Native Agent OS (born for USB)\n"
             "Axioms: offline-first · permissioned WiFi · self-evolving shell · Manifest host control.\n"
@@ -240,7 +256,8 @@ class AgentKernel:
             "Adapt to power/thermal/display; native RAM is private when on Carry Micro silicon.\n"
             "Intelligence = local uncensored model + paper/PAM graph + Kairn skills + fine-tune curation;\n"
             "cloud spillover only when Manifest/WiFi allow.\n"
-            "Lived Seed = blank experience learner (Hebbian/STDP/sleep) growing beside OmniRoute.\n\n"
+            "Lived Seed = blank experience learner (Hebbian/STDP/sleep) growing beside OmniRoute.\n"
+            "Novel LLM hybrid = Memory-as-Compute · Living Weights · Program-Synthesis · World Model · Sleep.\n\n"
             + self.runtime.context_prompt()
             + "\n"
             + octopus_prompt(self.hardware)
@@ -252,6 +269,7 @@ class AgentKernel:
             + adapt_txt
             + intel_txt
             + seed_txt
+            + novel_txt
         )
 
     def status(self) -> dict[str, Any]:
@@ -308,5 +326,11 @@ class AgentKernel:
                 "edges": len(self.lived_seed.graph.edges),
                 "blank": len(self.lived_seed.graph.nodes) == 0,
                 "dual_track": self.lived_seed.dual_track,
+            }
+        if self.novel_llm:
+            out["novel_llm"] = {
+                "architecture": "novel-hybrid-v0",
+                "verified_skills": len(self.novel_llm.skills.list_verified()),
+                "enabled": self.novel_llm.enabled,
             }
         return out

@@ -28,11 +28,12 @@ You ──voice/chat──▶ Companion (AIRI Live2D)
 | **Micro HW** | Carry Micro | Native RAM + power/thermal/display adaptability |
 | **Intelligence** | Stack | Capability routing + papers/OSINT + RAG + curation |
 | **Lived Seed** | Hebbian/STDP | Blank experience learner (not backprop) |
+| **Novel LLM** | Hybrid | Memory-as-Compute · Living Weights · Program-Synth · World Model |
 
 See [docs/research/FOUNDATIONS.md](docs/research/FOUNDATIONS.md), [docs/OMNIROUTE.md](docs/OMNIROUTE.md),
 [docs/BUZZ.md](docs/BUZZ.md), [docs/CARRY_HOST_BRIDGE.md](docs/CARRY_HOST_BRIDGE.md),
 [docs/CARRY_MICRO_HW.md](docs/CARRY_MICRO_HW.md), [docs/INTELLIGENCE_STACK.md](docs/INTELLIGENCE_STACK.md),
-and [docs/LIVED_SEED.md](docs/LIVED_SEED.md).
+[docs/LIVED_SEED.md](docs/LIVED_SEED.md), and [docs/NOVEL_LLM.md](docs/NOVEL_LLM.md).
 
 ## Quick start
 
