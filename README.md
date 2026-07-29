@@ -1,80 +1,63 @@
 # Robin Igris
 
-Hermes Agent brain + AIRI-style Live2D companion (voice + avatar).
+Hermes Agent brain + AIRI Live2D companion + **System 3** persistence
+(OpenLife / Sophia / OpenSkill).
 
 ```
-You  ──voice/chat──▶  Companion Stage (AIRI Live2D + lipsync)
-                           │
-                           ▼
-                    Hermes API (:8642)   ← tools, memory, skills (prebuilt)
+You ──voice/chat──▶ Companion (AIRI Live2D)
+                         │
+                         ▼
+              System 3 (heartbeat, budget, journal, skills)
+                         │
+                         ▼
+                 Hermes API (:8642)
 ```
 
 | Layer | Source | Role |
 |-------|--------|------|
-| **Brain** | [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) | Tool-calling agent, memory, skills, TTS providers |
-| **Body** | [moeru-ai/airi](https://github.com/moeru-ai/airi) | Live2D avatar (Hiyori presets), Cubism SDK, lipsync |
-| **Glue** | this repo | Companion UI, voice bridge, Robin Igris character |
+| **System 3** | [OpenLife](https://www.alphaxiv.org/abs/2606.31046), [Sophia](https://www.alphaxiv.org/abs/2512.18202), [OpenSkill](https://www.alphaxiv.org/abs/2606.06741) | Persistence, intrinsic goals, skill bootstrap |
+| **Brain** | [Hermes Agent](https://github.com/NousResearch/hermes-agent) | Tools, memory, skills hub |
+| **Body** | [Project AIRI](https://github.com/moeru-ai/airi) | Live2D avatar + voice presence |
+
+See [docs/research/FOUNDATIONS.md](docs/research/FOUNDATIONS.md).
 
 ## Quick start
 
-### 1. Install Hermes (the brain)
-
+### 1. Hermes
 ```bash
 curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash
-source ~/.bashrc
-hermes model          # pick a provider
+hermes model
 hermes config set API_SERVER_ENABLED true
 hermes config set API_SERVER_KEY robin-igris-dev
-hermes config set API_SERVER_CORS_ORIGINS http://127.0.0.1:5173,http://localhost:5173
-# optional: load character
+hermes config set API_SERVER_CORS_ORIGINS http://127.0.0.1:5173
 cp character/SOUL.md ~/.hermes/SOUL.md
-hermes gateway        # API on http://127.0.0.1:8642
+hermes gateway
 ```
 
-### 2. Companion stage (avatar + voice)
-
-```bash
-cd companion
-npm install
-npm run dev           # http://127.0.0.1:5173
-```
-
-Allow mic access. Hold **Talk**, or type in the chat box. The Live2D model (AIRI’s Hiyori Free, from `dist.ayaka.moe`) lip-syncs to TTS.
-
-### 3. Optional voice bridge
-
-If you want server-side TTS (Edge / OpenAI) without Hermes Tool Gateway:
-
+### 2. Voice + companion
 ```bash
 pip install -r requirements.txt
 python -m robin_igris.voice_server
+cd companion && npm install && npm run dev
 ```
 
-## Env
-
-Copy `.env.example` → `.env` (companion reads Vite `VITE_*`; voice server reads the rest).
-
-| Variable | Purpose |
-|----------|---------|
-| `VITE_HERMES_BASE_URL` | Hermes API, default `http://127.0.0.1:8642/v1` |
-| `VITE_HERMES_API_KEY` | Must match `API_SERVER_KEY` |
-| `VITE_VOICE_BASE_URL` | Voice bridge, default `http://127.0.0.1:8787` |
-| `OPENAI_API_KEY` / `OPENAI_BASE_URL` | Fallback TTS / chat if Hermes is down |
+### 3. System 3
+```bash
+python -m robin_igris.system3.cli status
+python -m robin_igris.system3.cli wake "Summarize this repo in 5 bullets"
+python -m robin_igris.system3.cli heartbeat
+python -m robin_igris.system3.cli skill "Write a safe git commit workflow"
+python -m robin_igris.system3.cli credit 1.0   # basic income
+```
 
 ## Layout
-
 ```
-character/SOUL.md     Robin Igris identity for Hermes
-companion/            Vite + Vue Live2D stage (AIRI assets/plugins)
-robin_igris/          Voice bridge + thin Hermes client helpers
-scripts/setup.sh      Dependency checks
+character/SOUL.md
+companion/                 AIRI Live2D stage
+robin_igris/system3/       OpenLife/Sophia/OpenSkill layer
+robin_igris/voice_server.py
+docs/research/FOUNDATIONS.md
 ```
-
-## Credits
-
-- Agent runtime: [Hermes Agent](https://github.com/NousResearch/hermes-agent) (MIT) by Nous Research
-- Avatar / Live2D tooling: [Project AIRI](https://github.com/moeru-ai/airi) (MIT) by Moeru AI — models via [`@proj-airi/unplugin-fetch`](https://www.npmjs.com/package/@proj-airi/unplugin-fetch) & [`@proj-airi/unplugin-live2d-sdk`](https://www.npmjs.com/package/@proj-airi/unplugin-live2d-sdk)
 
 ## License
-
-MIT — see [LICENSE](LICENSE). Live2D Cubism SDK is subject to Live2D’s proprietary license (fetched at build time, same as AIRI).
+MIT — see [LICENSE](LICENSE). Cubism SDK is subject to Live2D’s license (fetched at build).
