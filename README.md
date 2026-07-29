@@ -23,10 +23,11 @@ You ──voice/chat──▶ Companion (AIRI Live2D)
 | **System 3** | [OpenLife](https://www.alphaxiv.org/abs/2606.31046), [Sophia](https://www.alphaxiv.org/abs/2512.18202), [OpenSkill](https://www.alphaxiv.org/abs/2606.06741), [Channel Fracture / CADVP](https://www.alphaxiv.org/abs/2606.04896v2) | Persistence, skills, **delivery verification** |
 | **Tools (opt.)** | [Hermes Agent](https://github.com/NousResearch/hermes-agent) | Optional tools/memory hub |
 | **Body** | [Project AIRI](https://github.com/moeru-ai/airi) | Live2D avatar + voice presence |
-| **OS** | PNAOS (`aos/`) | Pendrive Agent OS — agent is the shell |
+| **OS** | PNAOS / **Carry** (`aos/`) | Pendrive Agent OS — agent is the shell |
+| **Host bridge** | Carry host control | Manifest-scoped FS / apps / computer-use |
 
 See [docs/research/FOUNDATIONS.md](docs/research/FOUNDATIONS.md), [docs/OMNIROUTE.md](docs/OMNIROUTE.md),
-and [docs/BUZZ.md](docs/BUZZ.md).
+[docs/BUZZ.md](docs/BUZZ.md), and [docs/CARRY_HOST_BRIDGE.md](docs/CARRY_HOST_BRIDGE.md).
 
 ## Quick start
 

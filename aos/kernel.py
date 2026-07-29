@@ -14,6 +14,9 @@ from aos.manifest import Manifest, ManifestRuntime
 from aos.octopus import as_prompt as octopus_prompt
 from aos.octopus import probe as octopus_probe
 from aos.evolution import EvolutionStore
+from aos.host_control import HostControlContract
+from aos.host_probe import as_prompt as host_probe_prompt
+from aos.host_probe import probe_host
 from aos.offline_queue import OfflineQueue
 from aos.soul import SoulStore
 from aos.wifi_contract import WifiContract
@@ -41,6 +44,8 @@ class AgentKernel:
     wifi: WifiContract | None = None
     queue: OfflineQueue | None = None
     evolution: EvolutionStore | None = None
+    host_control: HostControlContract | None = None
+    host_probe: dict[str, Any] = field(default_factory=dict)
 
     @classmethod
     def create(cls, usb_root: Path, manifest_path: Path | None = None) -> "AgentKernel":
@@ -70,6 +75,11 @@ class AgentKernel:
         )
         queue = OfflineQueue(usb_root / "data" / "queue")
         evolution = EvolutionStore(usb_root / "data" / "shell")
+        host_control = HostControlContract.from_manifest_raw(
+            manifest.raw,
+            approval_dir=aos_data / "approvals",
+        )
+        host_probe_data = probe_host()
         kernel = cls(
             root=usb_root,
             manifest=manifest,
@@ -80,6 +90,8 @@ class AgentKernel:
             wifi=wifi,
             queue=queue,
             evolution=evolution,
+            host_control=host_control,
+            host_probe=host_probe_data,
         )
         kernel.audit_path = aos_data / "audit.jsonl"
         kernel.goals = [
@@ -178,9 +190,14 @@ class AgentKernel:
                 f"\n## Evolving shell\n{json.dumps(self.evolution.status(), indent=2)}\n"
                 "Propose Manifest changes for human approval; skills may self-promote after verify.\n"
             )
+        host_txt = ""
+        if self.host_control:
+            host_txt = "\n" + self.host_control.context_prompt()
+        if self.host_probe:
+            host_txt += "\n" + host_probe_prompt(self.host_probe)
         return (
-            "# Pendrive-Native Agent OS (born for USB)\n"
-            "Axioms: offline-first · permissioned WiFi · self-evolving shell.\n"
+            "# Carry / Pendrive-Native Agent OS (born for USB)\n"
+            "Axioms: offline-first · permissioned WiFi · self-evolving shell · Manifest host control.\n"
             "You are the operating system shell. There is no desktop. The avatar is the UI.\n"
             "Unplugging the USB is intentional shutdown — preserve the soul.\n\n"
             + self.runtime.context_prompt()
@@ -190,6 +207,7 @@ class AgentKernel:
             + self.soul.context_prompt()
             + wifi_txt
             + evo_txt
+            + host_txt
         )
 
     def status(self) -> dict[str, Any]:
@@ -221,4 +239,6 @@ class AgentKernel:
             out["offline_queue_pending"] = len(self.queue.list_pending())
         if self.evolution:
             out["evolution"] = self.evolution.status()
+        if self.host_control:
+            out["host_control"] = self.host_control.status()
         return out

@@ -169,6 +169,8 @@ def recall_notes() -> str:
 # Buzz.xyz shared workspace tools (Manifest-gated)
 from robin_igris.buzz.tools import TOOL_IMPLS as _BUZZ_IMPLS  # noqa: E402
 from robin_igris.buzz.tools import TOOL_SCHEMAS as _BUZZ_SCHEMAS  # noqa: E402
+from robin_igris.host_bridge.tools import TOOL_IMPLS as _HOST_IMPLS  # noqa: E402
+from robin_igris.host_bridge.tools import TOOL_SCHEMAS as _HOST_SCHEMAS  # noqa: E402
 
 
 TOOL_IMPLS: dict[str, Callable[..., str]] = {
@@ -178,6 +180,7 @@ TOOL_IMPLS: dict[str, Callable[..., str]] = {
     "remember_note": remember_note,
     "recall_notes": recall_notes,
     **_BUZZ_IMPLS,
+    **_HOST_IMPLS,
 }
 
 TOOL_SCHEMAS: list[dict[str, Any]] = [
@@ -259,6 +262,7 @@ TOOL_SCHEMAS: list[dict[str, Any]] = [
 ]
 
 TOOL_SCHEMAS.extend(_BUZZ_SCHEMAS)
+TOOL_SCHEMAS.extend(_HOST_SCHEMAS)
 
 
 def run_tool(name: str, arguments: dict[str, Any] | str) -> str:
@@ -271,6 +275,12 @@ def run_tool(name: str, arguments: dict[str, Any] | str) -> str:
         from robin_igris.buzz.gate import require_buzz_tool
 
         denied = require_buzz_tool(name)
+        if denied:
+            return denied
+    if name.startswith("host_"):
+        from robin_igris.host_bridge.gate import require_host_tool
+
+        denied = require_host_tool(name)
         if denied:
             return denied
     fn = TOOL_IMPLS.get(name)

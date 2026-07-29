@@ -48,7 +48,7 @@ class AgentShell:
             f"  absent (no stubs)   : {denied}",
             "",
             "  Unplug USB or Ctrl+C = intentional shutdown (soul sealed).",
-            "  :status :soul :goals :buzz :wifi :evolve :kairn :flush :quit",
+            "  :status :soul :goals :buzz :wifi :evolve :host :kairn :flush :quit",
             "",
         ]
         return "\n".join(lines)
@@ -97,6 +97,13 @@ class AgentShell:
                 from robin_igris.buzz.tools import buzz_status
 
                 return buzz_status()
+            except Exception as exc:  # noqa: BLE001
+                return json.dumps({"error": str(exc)})
+        if text == ":host":
+            try:
+                from robin_igris.host_bridge.tools import host_status
+
+                return host_status()
             except Exception as exc:  # noqa: BLE001
                 return json.dumps({"error": str(exc)})
         if text == ":wifi":

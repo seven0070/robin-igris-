@@ -29,6 +29,7 @@ DEFAULT_MANIFEST = {
         "gpu": False,
         "local_llm": True,
         "buzz": True,
+        "host_control": False,
     },
     "budget": {
         "balance_usd": 5.0,
@@ -52,6 +53,59 @@ DEFAULT_MANIFEST = {
         "buzz_request_human_input": True,
         "buzz_search": True,
         "buzz_feed": True,
+        "host_status": True,
+        "host_list_dir": True,
+        "host_read_file": True,
+        "host_write_file": True,
+        "host_delete_file": True,
+        "host_launch_app": True,
+        "host_computer_use": True,
+        "host_run_command": True,
+    },
+    "host_control": {
+        "enabled": False,
+        "filesystem": {
+            "paths": [
+                {
+                    "path": "~/Documents/projects/",
+                    "access": ["read", "write", "create"],
+                    "note": "Active project files",
+                },
+                {
+                    "path": "~/Desktop/",
+                    "access": ["read", "write", "create"],
+                    "note": "Drop zone for agent outputs",
+                },
+            ],
+            "rules": {
+                "max_file_size_mb": 50,
+                "require_approval_for": ["delete", "overwrite"],
+            },
+        },
+        "applications": {
+            "allowed": ["code", "browser", "terminal", "finder", "explorer"],
+            "actions": ["launch", "quit", "send_keystrokes"],
+        },
+        "computer_use": {
+            "mouse": ["click", "drag", "scroll", "move"],
+            "keyboard": ["type", "shortcut"],
+            "clipboard": ["read", "write"],
+            "screenshot": True,
+            "live": False,
+            "rules": {
+                "confirm_before": [
+                    "file_delete",
+                    "app_install",
+                    "system_settings",
+                    "sudo_commands",
+                ]
+            },
+        },
+        "terminal": {
+            "allowed": False,
+            "deny_patterns": ["sudo", "rm -rf /", "mkfs", "dd if="],
+            "cwd_must_be_under": ["~/Documents/projects/", "~/Desktop/"],
+        },
     },
     "wifi": {
         "default": "deny",
@@ -128,7 +182,7 @@ class Manifest:
             "capabilities": self.capabilities,
             "goals": self.goals,
         }
-        for key in ("budget", "routing", "tools", "wifi"):
+        for key in ("budget", "routing", "tools", "wifi", "host_control"):
             if self.raw.get(key) is not None:
                 payload[key] = self.raw[key]
         if path.suffix in {".yaml", ".yml"} and yaml is not None:
@@ -165,8 +219,11 @@ class ManifestRuntime:
             "gpu": m.get("gpu", False) and bool(hw.get("has_gpu", False)),
             # Local LLM does not require WAN — OmniRoute → Ollama/llama.cpp on stick/host
             "local_llm": m.get("local_llm", True),
-            # Buzz shared workspace — needs network + Manifest.buzz
             "buzz": m.get("buzz", False) and bool(hw.get("has_network", False)),
+            "filesystem_host": m.get("filesystem_host", False),
+            "host_control": m.get("host_control", False) or bool(
+                (self.manifest.raw.get("host_control") or {}).get("enabled")
+            ),
         }
         self.effective = gated
         return gated
@@ -178,8 +235,12 @@ class ManifestRuntime:
             # Legacy manifests: buzz_* tools require buzz capability
             if tool_name.startswith("buzz_"):
                 return bool(self.effective.get("buzz", False))
+            if tool_name.startswith("host_"):
+                return bool(self.effective.get("host_control", False))
             return True
         if tool_name.startswith("buzz_") and not self.effective.get("buzz", False):
+            return False
+        if tool_name.startswith("host_") and not self.effective.get("host_control", False):
             return False
         return bool(tools.get(tool_name, False))
 

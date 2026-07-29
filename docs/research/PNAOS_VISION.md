@@ -172,7 +172,14 @@ The paradigm: **kernel smallest, agent identity largest.** Every decision asks:
 
 ---
 
-## Languages — Aergon & Kairn
+## Host bridge (Carry)
+
+The agent may **act** on the borrowed host under Manifest `host_control`:
+scoped filesystem, allowed apps, computer-use (dry-run by default), terminal
+(optional; sudo denied). Boot runs a **Host Control Probe** (Octopus-style) so
+the agent gets a capability map instead of discovering by trial and error.
+
+See [docs/CARRY_HOST_BRIDGE.md](../CARRY_HOST_BRIDGE.md). Product name for PNAOS: **Carry**.
 
 Self-evolution needs languages *born* for agents, not ported from app stacks:
 
