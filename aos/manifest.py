@@ -78,6 +78,10 @@ DEFAULT_MANIFEST = {
         "pne_ask": True,
         "pne_idle": True,
         "pne_overnight": True,
+        "robin_status": True,
+        "robin_ask": True,
+        "robin_idle": True,
+        "robin_overnight": True,
     },
     "host_control": {
         "enabled": False,
@@ -182,7 +186,14 @@ DEFAULT_MANIFEST = {
         "enabled": True,
         "engine_params_m": 50,
         "layers": ["thin_engine", "pam_graph_sqlite", "metabolism"],
-        "note": "Hardware-up model for NPU/LPDDR/eMMC/USB watts — find, don't guess.",
+        "note": "Legacy key — prefer robin.",
+    },
+    "robin": {
+        "enabled": True,
+        "name": "Robin",
+        "engine_params_m": 50,
+        "layers": ["thin_engine", "pam_graph_sqlite", "metabolism"],
+        "note": "Robin — pendrive-native mind. Carry is the OS; Robin is the mind on the stick.",
     },
     "wifi": {
         "default": "deny",
@@ -270,6 +281,7 @@ class Manifest:
             "lived_seed",
             "novel_llm",
             "pendrive_native",
+            "robin",
         ):
             if self.raw.get(key) is not None:
                 payload[key] = self.raw[key]

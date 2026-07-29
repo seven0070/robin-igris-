@@ -168,9 +168,9 @@ def novel_forward(query: str) -> str:
 
 def _pne():
     root = Path(os.getenv("ROBIN_USB_ROOT") or os.getenv("AOS_USB_ROOT") or ".")
-    from robin_igris.pendrive_native import PendriveNativeModel
+    from robin_igris.pendrive_native import Robin
 
-    return PendriveNativeModel.create(root)
+    return Robin.create(root)
 
 
 def pne_status() -> str:
@@ -187,6 +187,13 @@ def pne_idle() -> str:
 
 def pne_overnight() -> str:
     return _ok(_pne().consolidate())
+
+
+# Canonical names
+robin_status = pne_status
+robin_ask = pne_ask
+robin_idle = pne_idle
+robin_overnight = pne_overnight
 
 
 TOOL_IMPLS: dict[str, Callable[..., str]] = {
@@ -207,6 +214,10 @@ TOOL_IMPLS: dict[str, Callable[..., str]] = {
     "pne_ask": pne_ask,
     "pne_idle": pne_idle,
     "pne_overnight": pne_overnight,
+    "robin_status": robin_status,
+    "robin_ask": robin_ask,
+    "robin_idle": robin_idle,
+    "robin_overnight": robin_overnight,
 }
 
 TOOL_SCHEMAS: list[dict[str, Any]] = [
@@ -374,7 +385,7 @@ TOOL_SCHEMAS: list[dict[str, Any]] = [
         "type": "function",
         "function": {
             "name": "pne_status",
-            "description": "Pendrive-native engine status (thin core + SQLite PAM graph + metabolism).",
+            "description": "Alias for robin_status — Robin pendrive-native mind.",
             "parameters": {"type": "object", "properties": {}},
         },
     },
@@ -382,7 +393,7 @@ TOOL_SCHEMAS: list[dict[str, Any]] = [
         "type": "function",
         "function": {
             "name": "pne_ask",
-            "description": "Ask the pendrive-native engine — finds in graph or says it does not know yet.",
+            "description": "Alias for robin_ask — ask Robin (finds in graph or does not know yet).",
             "parameters": {
                 "type": "object",
                 "properties": {"text": {"type": "string"}},
@@ -394,7 +405,7 @@ TOOL_SCHEMAS: list[dict[str, Any]] = [
         "type": "function",
         "function": {
             "name": "pne_idle",
-            "description": "Run idle-phase metabolism (~10 mW class silent replay).",
+            "description": "Alias for robin_idle — idle-phase metabolism.",
             "parameters": {"type": "object", "properties": {}},
         },
     },
@@ -402,7 +413,43 @@ TOOL_SCHEMAS: list[dict[str, Any]] = [
         "type": "function",
         "function": {
             "name": "pne_overnight",
-            "description": "Run overnight consolidation (~1 W class prune/promote/abstract).",
+            "description": "Alias for robin_overnight — overnight consolidation.",
+            "parameters": {"type": "object", "properties": {}},
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "robin_status",
+            "description": "Robin status — pendrive-native mind (thin engine + PAM graph + metabolism).",
+            "parameters": {"type": "object", "properties": {}},
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "robin_ask",
+            "description": "Ask Robin — finds in the memory graph or says it does not know yet.",
+            "parameters": {
+                "type": "object",
+                "properties": {"text": {"type": "string"}},
+                "required": ["text"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "robin_idle",
+            "description": "Robin idle-phase metabolism (~10 mW class silent replay).",
+            "parameters": {"type": "object", "properties": {}},
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "robin_overnight",
+            "description": "Robin overnight consolidation (~1 W class prune/promote/abstract).",
             "parameters": {"type": "object", "properties": {}},
         },
     },

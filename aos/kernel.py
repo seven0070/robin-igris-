@@ -115,10 +115,10 @@ class AgentKernel:
             soul=soul,
             enabled=bool(novel_cfg.get("enabled", True)),
         )
-        pne_cfg = (manifest.raw or {}).get("pendrive_native") or {}
-        from robin_igris.pendrive_native import PendriveNativeModel
+        pne_cfg = (manifest.raw or {}).get("robin") or (manifest.raw or {}).get("pendrive_native") or {}
+        from robin_igris.pendrive_native import Robin
 
-        pendrive_native = PendriveNativeModel.create(
+        robin = Robin.create(
             usb_root,
             enabled=bool(pne_cfg.get("enabled", True)),
         )
@@ -138,7 +138,7 @@ class AgentKernel:
             intelligence=intelligence,
             lived_seed=lived_seed,
             novel_llm=novel_llm,
-            pendrive_native=pendrive_native,
+            pendrive_native=robin,
         )
         kernel.audit_path = aos_data / "audit.jsonl"
         kernel.goals = [
@@ -154,7 +154,8 @@ class AgentKernel:
                 "adaptability": adaptability.status(),
                 "lived_seed": lived_seed.status(),
                 "novel_llm": novel_llm.status(),
-                "pendrive_native": pendrive_native.status(),
+                "pendrive_native": robin.status(),
+                "robin": robin.status(),
                 "axioms": ["offline-first", "permissioned-wifi", "self-evolving-shell"],
             },
         )
@@ -271,7 +272,7 @@ class AgentKernel:
             "cloud spillover only when Manifest/WiFi allow.\n"
             "Lived Seed = blank experience learner (Hebbian/STDP/sleep) growing beside OmniRoute.\n"
             "Novel LLM hybrid = Memory-as-Compute · Living Weights · Program-Synthesis · World Model · Sleep.\n"
-            "Pendrive-native engine = thin traversal core + SQLite PAM graph + metabolic plasticity.\n\n"
+            "Pendrive-native engine = **Robin** — thin traversal core + SQLite PAM graph + metabolic plasticity.\n\n"
             + self.runtime.context_prompt()
             + "\n"
             + octopus_prompt(self.hardware)
@@ -349,9 +350,11 @@ class AgentKernel:
                 "enabled": self.novel_llm.enabled,
             }
         if self.pendrive_native:
-            out["pendrive_native"] = {
-                "architecture": "pendrive-native-v0",
+            out["robin"] = {
+                "name": "Robin",
+                "architecture": "robin-v0",
                 "counts": self.pendrive_native.store.counts(),
                 "blank": self.pendrive_native.status().get("blank"),
             }
+            out["pendrive_native"] = out["robin"]
         return out

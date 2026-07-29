@@ -1,5 +1,7 @@
 # Pendrive-native model — designed from the hardware up
 
+> The product name for this mind is **[Robin](ROBIN.md)**. Carry is the OS; Robin is the mind.
+
 Normal LLMs are designed for H100s, 80 GB HBM, and million-dollar training runs.
 This engine is designed for the **left column**: NPU ~1 TOPS, 4–8 GB LPDDR, 128 GB
 eMMC, 2.5–15 W USB power, nightly consolidation.
@@ -16,7 +18,7 @@ No transformer. No next-token prediction. No backpropagation. No training data.
 
 ```
 User: "What's the capital of France?"
-Engine:
+Robin:
   1. Parse → entity:[France], relation:capital_of
   2. Traverse graph
   3. Found → synthesize answer
@@ -35,17 +37,16 @@ Engine:
 ## Shell
 
 ```bash
-:pne
-:pne Your name is Iris.
-:pne Paris is the capital of France.
-:pne What is the capital of France?
-:pne idle
-:pne overnight
+:robin
+:robin Paris is the capital of France.
+:robin What is the capital of France?
+:robin idle
+:robin overnight
 ```
 
 ## Uniqueness
 
-Weights are not the product. The **graph on this stick** + fused identity is.
+Weights are not the product. **Robin's graph on this stick** + fused identity is.
 Cloning eMMC without the enclave is not cloning the agent.
 
-Code: `robin_igris/pendrive_native/` · Manifest: `pendrive_native.enabled`
+Code: `robin_igris/pendrive_native/` · Manifest: `robin.enabled`

@@ -212,12 +212,11 @@ Not a smaller transformer. Five mechanisms unified: Memory-as-Compute, Living
 Weights, Program-Synthesis, Predictive World Model, Overnight consolidation.
 See [docs/NOVEL_LLM.md](../NOVEL_LLM.md). Shell: `:novel <query>`.
 
-### Pendrive-native model (hardware-up)
+### Robin (pendrive-native mind)
 
-Thin traversal engine + SQLite/FTS5 PAM graph + metabolic plasticity — sized for
-NPU / LPDDR / eMMC / USB watts. Finds answers in the graph or says it does not
-know yet. See [docs/PENDRIVE_NATIVE_MODEL.md](../PENDRIVE_NATIVE_MODEL.md).
-Shell: `:pne`.
+**Carry** is the OS. **Robin** is the mind on the stick — thin traversal engine +
+SQLite/FTS5 PAM graph + metabolic plasticity. Finds answers or says she does not
+know yet. See [docs/ROBIN.md](../ROBIN.md). Shell: `:robin`.
 
 Self-evolution needs languages *born* for agents, not ported from app stacks:
 

@@ -1,7 +1,10 @@
-"""Pendrive-native model — designed for the left column (NPU, 4–8 GB, 128 GB eMMC, USB watts).
+"""Robin — pendrive-native model (hardware-up).
 
+Designed for the left column: NPU, 4–8 GB LPDDR, 128 GB eMMC, USB watts.
 No transformer. No next-token prediction. No backprop. No training data.
 Three layers: thin engine · PAM graph on eMMC · metabolic plasticity.
+
+The name is **Robin**. Carry is the OS. Robin is the mind on the stick.
 """
 
 from __future__ import annotations
@@ -17,6 +20,8 @@ from robin_igris.pendrive_native.graph_store import GraphStore
 from robin_igris.pendrive_native.metabolism import idle_tick, overnight
 
 
+NAME = "Robin"
+
 HARDWARE_PROFILE = {
     "engine_params_m": 50,
     "engine_ram_mb": 50,
@@ -30,7 +35,9 @@ HARDWARE_PROFILE = {
 
 
 @dataclass
-class PendriveNativeModel:
+class Robin:
+    """Pendrive-native mind — finds in the graph, learns by metabolism, unique to this stick."""
+
     root: Path
     store: GraphStore
     engine: ThinEngine
@@ -38,15 +45,31 @@ class PendriveNativeModel:
     born_at: float = 0.0
 
     @classmethod
-    def create(cls, usb_root: Path, *, enabled: bool = True) -> "PendriveNativeModel":
-        root = Path(usb_root) / "data" / "aos" / "pendrive_native"
+    def create(cls, usb_root: Path, *, enabled: bool = True) -> "Robin":
+        root = Path(usb_root) / "data" / "aos" / "robin"
+        # migrate legacy path if present
+        legacy = Path(usb_root) / "data" / "aos" / "pendrive_native"
+        if legacy.exists() and not root.exists():
+            root = legacy
         root.mkdir(parents=True, exist_ok=True)
         store = GraphStore(root / "pam_graph.sqlite")
         born = store.get_meta("born_at")
         if born is None:
             born = time.time()
             store.set_meta("born_at", born)
-            store.set_meta("timeline", {"day0": "empty graph — I don't know yet"})
+            store.set_meta("name", NAME)
+            store.set_meta(
+                "timeline",
+                {"day0": f"{NAME} born — empty graph — I don't know yet"},
+            )
+            store.add_proposition(
+                subject="this_agent",
+                relation="named",
+                obj=NAME.lower(),
+                text=f"Agent name is {NAME}",
+                kind="identity",
+                confidence=1.0,
+            )
         return cls(
             root=root,
             store=store,
@@ -60,7 +83,8 @@ class PendriveNativeModel:
         result = self.engine.respond(text)
         age_days = (time.time() - self.born_at) / 86400.0
         return {
-            "architecture": "pendrive-native-v0",
+            "name": NAME,
+            "architecture": "robin-v0",
             "reply": result.reply,
             "found": result.found,
             "path": result.path,
@@ -74,21 +98,21 @@ class PendriveNativeModel:
 
     def idle(self) -> dict[str, Any]:
         report = idle_tick(self.store)
-        return report.to_dict()
+        return {"name": NAME, **report.to_dict()}
 
     def consolidate(self) -> dict[str, Any]:
         report = overnight(self.store)
-        # append sleep log
         with (self.root / "metabolism.jsonl").open("a", encoding="utf-8") as f:
-            f.write(json.dumps({"ts": time.time(), **report.to_dict()}) + "\n")
-        return report.to_dict()
+            f.write(json.dumps({"ts": time.time(), "name": NAME, **report.to_dict()}) + "\n")
+        return {"name": NAME, **report.to_dict()}
 
     def status(self) -> dict[str, Any]:
         age_days = (time.time() - self.born_at) / 86400.0
         counts = self.store.counts()
         return {
+            "name": NAME,
             "enabled": self.enabled,
-            "architecture": "pendrive-native-v0",
+            "architecture": "robin-v0",
             "layers": {
                 "1_thin_engine": "memory traversal GNN-class — not transformer",
                 "2_pam_graph": "SQLite+FTS5+typed edges on eMMC",
@@ -99,14 +123,18 @@ class PendriveNativeModel:
             "age_days": round(age_days, 3),
             "born_at": self.born_at,
             "soul_rewrite": self.store.get_meta("soul_rewrite"),
-            "blank": counts["propositions"] == 0,
+            "blank": counts["propositions"] <= 1,  # identity name alone
             "unique": "graph + fused identity key ⇒ not a clonable weight file",
         }
 
     def context_prompt(self) -> str:
         return (
-            "## Pendrive-native model (hardware-up)\n"
+            f"## {NAME} — pendrive-native mind (hardware-up)\n"
             "Designed for NPU / LPDDR / eMMC / USB watts — not H100 clusters.\n"
             "Knowledge in the graph. Engine only navigates. Learning is metabolism.\n"
             f"```json\n{json.dumps(self.status(), indent=2, default=str)}\n```\n"
         )
+
+
+# Back-compat alias
+PendriveNativeModel = Robin
