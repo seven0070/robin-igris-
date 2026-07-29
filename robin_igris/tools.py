@@ -173,6 +173,8 @@ from robin_igris.host_bridge.tools import TOOL_IMPLS as _HOST_IMPLS  # noqa: E40
 from robin_igris.host_bridge.tools import TOOL_SCHEMAS as _HOST_SCHEMAS  # noqa: E402
 from robin_igris.intel_tools import TOOL_IMPLS as _INTEL_IMPLS  # noqa: E402
 from robin_igris.intel_tools import TOOL_SCHEMAS as _INTEL_SCHEMAS  # noqa: E402
+from robin_igris.grok_build.tools import TOOL_IMPLS as _GROK_IMPLS  # noqa: E402
+from robin_igris.grok_build.tools import TOOL_SCHEMAS as _GROK_SCHEMAS  # noqa: E402
 
 
 TOOL_IMPLS: dict[str, Callable[..., str]] = {
@@ -184,6 +186,7 @@ TOOL_IMPLS: dict[str, Callable[..., str]] = {
     **_BUZZ_IMPLS,
     **_HOST_IMPLS,
     **_INTEL_IMPLS,
+    **_GROK_IMPLS,
 }
 
 TOOL_SCHEMAS: list[dict[str, Any]] = [
@@ -267,6 +270,7 @@ TOOL_SCHEMAS: list[dict[str, Any]] = [
 TOOL_SCHEMAS.extend(_BUZZ_SCHEMAS)
 TOOL_SCHEMAS.extend(_HOST_SCHEMAS)
 TOOL_SCHEMAS.extend(_INTEL_SCHEMAS)
+TOOL_SCHEMAS.extend(_GROK_SCHEMAS)
 
 
 def run_tool(name: str, arguments: dict[str, Any] | str) -> str:

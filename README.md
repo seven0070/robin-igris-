@@ -30,12 +30,14 @@ You ──voice/chat──▶ Companion (AIRI Live2D)
 | **Lived Seed** | Hebbian/STDP | Blank experience learner (not backprop) |
 | **Novel LLM** | Hybrid | Memory-as-Compute · Living Weights · Program-Synth · World Model |
 | **Pendrive native** | **Robin** | Thin engine + SQLite PAM + metabolism |
+| **Coding sidecar** | [Grok Build](https://github.com/xai-org/grok-build) | SpaceXAI `grok` TUI / headless |
 
 See [docs/research/FOUNDATIONS.md](docs/research/FOUNDATIONS.md), [docs/OMNIROUTE.md](docs/OMNIROUTE.md),
 [docs/BUZZ.md](docs/BUZZ.md), [docs/CARRY_HOST_BRIDGE.md](docs/CARRY_HOST_BRIDGE.md),
 [docs/CARRY_MICRO_HW.md](docs/CARRY_MICRO_HW.md), [docs/INTELLIGENCE_STACK.md](docs/INTELLIGENCE_STACK.md),
 [docs/LIVED_SEED.md](docs/LIVED_SEED.md), [docs/NOVEL_LLM.md](docs/NOVEL_LLM.md),
-[docs/ROBIN.md](docs/ROBIN.md), and [docs/PENDRIVE_NATIVE_MODEL.md](docs/PENDRIVE_NATIVE_MODEL.md).
+[docs/ROBIN.md](docs/ROBIN.md), [docs/PENDRIVE_NATIVE_MODEL.md](docs/PENDRIVE_NATIVE_MODEL.md),
+and [docs/GROK_BUILD.md](docs/GROK_BUILD.md).
 
 ## Quick start
 
