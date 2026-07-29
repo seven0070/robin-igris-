@@ -1,11 +1,14 @@
 # Optional fallback agent (no Hermes)
 
-When Hermes gateway is unavailable, the original lightweight tool agent still works:
+When OmniRoute / Hermes are unavailable, the lightweight tool agent still works
+if any OpenAI-compatible endpoint is reachable (defaults to OmniRoute):
 
 ```bash
 pip install -r requirements.txt
-cp .env.example .env   # set OPENAI_API_KEY
+cp .env.example .env   # OmniRoute on :20128 by default
+./scripts/start-omniroute.sh   # in another terminal
 python main.py
 ```
 
-Prefer Hermes + companion for the full Robin Igris experience (avatar + voice).
+Prefer OmniRoute + companion for the full Robin Igris experience (avatar + voice).
+See [docs/OMNIROUTE.md](OMNIROUTE.md).

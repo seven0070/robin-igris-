@@ -42,11 +42,14 @@ Edit `USB/ROBIN_IGRIS/.env` (API keys). Eject.
 
 **Agent OS mode (recommended for the “OS on a stick” vision):**
 1. Plug in USB
-2. Double-click **`AOS_BOOT.bat`** (Windows) or run **`./aos-boot.sh`**
-3. Avatar shell opens — that *is* the OS UI
-4. Ctrl+C or STOP → soul seals → eject (unplug = intentional shutdown)
+2. Ensure OmniRoute is available on the host (`npm i -g omniroute`) — LAUNCH starts it
+3. Double-click **`AOS_BOOT.bat`** (Windows) or run **`./aos-boot.sh`**
+4. Avatar / CLI shell talks through OmniRoute (`:20128`)
+5. Ctrl+C or STOP → soul seals → eject (unplug = intentional shutdown)
 
-**Companion mode:** `LAUNCH.bat` / `launch.sh` (same stick, lighter).
+**Companion mode:** `LAUNCH.bat` / `launch.sh` (starts OmniRoute + voice + Live2D).
+
+LLM docs: [docs/OMNIROUTE.md](../docs/OMNIROUTE.md)
 
 ## Live USB (boot the PC from the stick)
 

@@ -1,25 +1,24 @@
-"""LLM client for OpenAI-compatible APIs."""
+"""LLM client — OmniRoute gateway (OpenAI-compatible).
+
+Primary backend: https://github.com/diegosouzapw/OmniRoute
+Default: http://127.0.0.1:20128/v1  model=auto
+"""
 
 from __future__ import annotations
 
-import os
 from typing import Any
 
 from openai import OpenAI
 
+from robin_igris import omniroute
+
 
 def get_client() -> OpenAI:
-    api_key = os.getenv("OPENAI_API_KEY", "")
-    base_url = os.getenv("OPENAI_BASE_URL") or None
-    if not api_key:
-        raise RuntimeError(
-            "OPENAI_API_KEY is not set. Copy .env.example to .env and add your key."
-        )
-    return OpenAI(api_key=api_key, base_url=base_url)
+    return OpenAI(api_key=omniroute.api_key(), base_url=omniroute.base_url())
 
 
 def get_model() -> str:
-    return os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+    return omniroute.model()
 
 
 def chat(
@@ -28,7 +27,7 @@ def chat(
     *,
     temperature: float = 0.4,
 ) -> Any:
-    """Send a chat completion request. Returns the message object."""
+    """Send a chat completion request via OmniRoute. Returns the message object."""
     client = get_client()
     kwargs: dict[str, Any] = {
         "model": get_model(),

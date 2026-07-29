@@ -1,38 +1,41 @@
 # Robin Igris
 
-Hermes Agent brain + AIRI Live2D companion + **System 3** persistence
-(OpenLife / Sophia / OpenSkill).
+Hermes Agent tools (optional) + AIRI Live2D companion + **System 3** persistence
++ **[OmniRoute](https://github.com/diegosouzapw/OmniRoute)** as the LLM gateway
++ Pendrive-Native Agent OS.
 
 ```
 You ──voice/chat──▶ Companion (AIRI Live2D)
                          │
                          ▼
-              System 3 (heartbeat, budget, journal, skills)
+              System 3 / AOS (soul, heartbeat, skills)
                          │
                          ▼
-                 Hermes API (:8642)
+              OmniRoute :20128/v1  (model=auto)
+                         │
+              free / cheap / API providers
 ```
 
 | Layer | Source | Role |
 |-------|--------|------|
+| **LLM** | [OmniRoute](https://github.com/diegosouzapw/OmniRoute) | One endpoint, 290+ providers, auto-fallback |
 | **System 3** | [OpenLife](https://www.alphaxiv.org/abs/2606.31046), [Sophia](https://www.alphaxiv.org/abs/2512.18202), [OpenSkill](https://www.alphaxiv.org/abs/2606.06741), [Channel Fracture / CADVP](https://www.alphaxiv.org/abs/2606.04896v2) | Persistence, skills, **delivery verification** |
-| **Brain** | [Hermes Agent](https://github.com/NousResearch/hermes-agent) | Tools, memory, skills hub |
+| **Tools (opt.)** | [Hermes Agent](https://github.com/NousResearch/hermes-agent) | Optional tools/memory hub |
 | **Body** | [Project AIRI](https://github.com/moeru-ai/airi) | Live2D avatar + voice presence |
+| **OS** | PNAOS (`aos/`) | Pendrive Agent OS — agent is the shell |
 
-See [docs/research/FOUNDATIONS.md](docs/research/FOUNDATIONS.md).
+See [docs/research/FOUNDATIONS.md](docs/research/FOUNDATIONS.md) and [docs/OMNIROUTE.md](docs/OMNIROUTE.md).
 
 ## Quick start
 
-### 1. Hermes
+### 1. OmniRoute (LLM)
 ```bash
-curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash
-hermes model
-hermes config set API_SERVER_ENABLED true
-hermes config set API_SERVER_KEY robin-igris-dev
-hermes config set API_SERVER_CORS_ORIGINS http://127.0.0.1:5173
-cp character/SOUL.md ~/.hermes/SOUL.md
-hermes gateway
+npm i -g omniroute && omniroute
+# or: ./scripts/start-omniroute.sh
+cp .env.example .env   # OMNIROUTE_* / OPENAI_* already point at :20128
 ```
+
+Dashboard: http://127.0.0.1:20128 — create an API key if prompted, set `OMNIROUTE_API_KEY`.
 
 ### 2. Voice + companion
 ```bash
@@ -50,6 +53,12 @@ python -m robin_igris.system3.cli skill "Write a safe git commit workflow"
 python -m robin_igris.system3.cli credit 1.0   # basic income
 python -m robin_igris.system3.cli cadvp-probe # Channel Fracture CC-0
 python -m robin_igris.system3.cli deliver "fact: deploys happen on Fridays"
+```
+
+### Optional: Hermes tools hub
+```bash
+curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash
+# set ROBIN_START_HERMES=1 in .env if you want portable_boot to launch it
 ```
 
 ## Layout

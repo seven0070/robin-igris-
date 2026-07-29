@@ -162,33 +162,46 @@ class SkillBootstrap:
             )
 
         try:
-            from robin_igris.hermes_client import chat as hermes_chat
+            from robin_igris.omniroute import chat_text
 
-            return hermes_chat(
+            return chat_text(
                 [
                     {
                         "role": "system",
                         "content": "You write concise, transferable agent skills. No target-task cheating.",
                     },
                     {"role": "user", "content": prompt},
-                ],
-                session_key="robin-igris-openskill",
+                ]
             )
         except Exception:
-            # Offline template so the loop still produces an artifact
-            return (
-                f"# skill-{_slug(task)}\n\n"
-                f"## Description\nBootstrap skill for: {task}\n\n"
-                "## Steps\n"
-                "1. Restate the goal and constraints.\n"
-                "2. Gather missing facts from trusted docs.\n"
-                "3. Execute the smallest working procedure.\n"
-                "4. Verify outputs against structural checks.\n\n"
-                "## Pitfalls\n"
-                "- Do not invent APIs.\n"
-                "- Do not use hidden benchmark answers.\n\n"
-                f"## Sources\n{source_block}\n"
-            )
+            try:
+                from robin_igris.hermes_client import chat as hermes_chat
+
+                return hermes_chat(
+                    [
+                        {
+                            "role": "system",
+                            "content": "You write concise, transferable agent skills. No target-task cheating.",
+                        },
+                        {"role": "user", "content": prompt},
+                    ],
+                    session_key="robin-igris-openskill",
+                )
+            except Exception:
+                # Offline template so the loop still produces an artifact
+                return (
+                    f"# skill-{_slug(task)}\n\n"
+                    f"## Description\nBootstrap skill for: {task}\n\n"
+                    "## Steps\n"
+                    "1. Restate the goal and constraints.\n"
+                    "2. Gather missing facts from trusted docs.\n"
+                    "3. Execute the smallest working procedure.\n"
+                    "4. Verify outputs against structural checks.\n\n"
+                    "## Pitfalls\n"
+                    "- Do not invent APIs.\n"
+                    "- Do not use hidden benchmark answers.\n\n"
+                    f"## Sources\n{source_block}\n"
+                )
 
     def evolve(
         self,

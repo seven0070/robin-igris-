@@ -49,6 +49,15 @@ def apply_env(root: Path) -> None:
     os.environ.setdefault("ROBIN_COMPANION_DIST", str(root / "companion-dist"))
     # System 3 paths
     os.environ.setdefault("ROBIN_SYSTEM3_ROOT", str(data / "system3"))
+    # Optional OmniRoute LLM gateway (primary brain)
+    # https://github.com/diegosouzapw/OmniRoute
+    os.environ.setdefault("OPENAI_BASE_URL", "http://127.0.0.1:20128/v1")
+    os.environ.setdefault("OPENAI_MODEL", "auto")
+    os.environ.setdefault("OMNIROUTE_BASE_URL", "http://127.0.0.1:20128/v1")
+    os.environ.setdefault("OMNIROUTE_MODEL", "auto")
+    if not os.getenv("OPENAI_API_KEY") and not os.getenv("OMNIROUTE_API_KEY"):
+        os.environ.setdefault("OPENAI_API_KEY", "omniroute")
+        os.environ.setdefault("OMNIROUTE_API_KEY", "omniroute")
     # Load .env from USB if present
     env_file = root / ".env"
     if env_file.exists():
@@ -90,6 +99,24 @@ def start_stack(root: Path) -> list[subprocess.Popen]:
     procs: list[subprocess.Popen] = []
     py = sys.executable
 
+    # OmniRoute LLM gateway (primary) — https://github.com/diegosouzapw/OmniRoute
+    if os.getenv("ROBIN_START_OMNIROUTE", "1") == "1":
+        omni = _resolve_omniroute_cmd(root)
+        if omni:
+            procs.append(
+                _popen(
+                    omni,
+                    cwd=app,
+                    log=logs / "omniroute.log",
+                )
+            )
+            print("Starting OmniRoute LLM gateway on :20128…")
+        else:
+            print(
+                "OmniRoute not found — install: npm i -g omniroute  "
+                "or docker pull diegosouzapw/omniroute"
+            )
+
     # Voice + companion static UI (PC display)
     procs.append(
         _popen(
@@ -105,7 +132,7 @@ def start_stack(root: Path) -> list[subprocess.Popen]:
         hermes_bin = shutil_which("hermes")
     else:
         hermes_bin = str(hermes)
-    if hermes_bin and os.getenv("ROBIN_START_HERMES", "1") == "1":
+    if hermes_bin and os.getenv("ROBIN_START_HERMES", "0") == "1":
         procs.append(
             _popen(
                 [hermes_bin, "gateway"],
@@ -115,6 +142,39 @@ def start_stack(root: Path) -> list[subprocess.Popen]:
         )
 
     return procs
+
+
+def _resolve_omniroute_cmd(root: Path) -> list[str] | None:
+    """Prefer local binary, then npx, then docker."""
+    data_dir = root / "data" / "omniroute"
+    data_dir.mkdir(parents=True, exist_ok=True)
+    env_cmd = os.getenv("OMNIROUTE_CMD")
+    if env_cmd:
+        return env_cmd.split()
+
+    bin_path = shutil_which("omniroute")
+    if bin_path:
+        return [bin_path]
+
+    npx = shutil_which("npx")
+    if npx and os.getenv("ROBIN_OMNIROUTE_NPX", "1") == "1":
+        return [npx, "-y", "omniroute"]
+
+    docker = shutil_which("docker")
+    if docker and os.getenv("ROBIN_OMNIROUTE_DOCKER", "0") == "1":
+        return [
+            docker,
+            "run",
+            "--rm",
+            "--name",
+            "robin-omniroute",
+            "-p",
+            "127.0.0.1:20128:20128",
+            "-v",
+            f"{data_dir}:/app/data",
+            "diegosouzapw/omniroute:latest",
+        ]
+    return None
 
 
 def shutil_which(cmd: str) -> str | None:

@@ -96,13 +96,30 @@ class AgentShell:
             except PermissionError as exc:
                 return f"capability {name!r}: denied — {exc}"
 
-        # Default: treat as agent utterance — record into soul.
+        # Default: treat as agent utterance — OmniRoute LLM when available.
         self.kernel.soul.append("episodic", f"user: {text}", meta={"role": "user"})
-        tip = self.kernel.soul.tip().get("merkle_root", "")[:12]
-        reply = (
-            f"[AOS] Received on borrowed host. Soul tip advancing ({tip}…). "
-            "Wire Hermes/companion for full reply (:status for capsule)."
-        )
+        try:
+            self.kernel.runtime.require("network")
+            from robin_igris.omniroute import chat_text
+
+            ctx = self.kernel.boot_context()
+            reply = chat_text(
+                [
+                    {"role": "system", "content": ctx},
+                    {"role": "user", "content": text},
+                ]
+            ).strip() or "(empty OmniRoute reply)"
+        except PermissionError:
+            tip = self.kernel.soul.tip().get("merkle_root", "")[:12]
+            reply = (
+                f"[AOS] Network capability absent — recorded only. tip={tip}…"
+            )
+        except Exception as exc:  # noqa: BLE001
+            tip = self.kernel.soul.tip().get("merkle_root", "")[:12]
+            reply = (
+                f"[AOS] OmniRoute unreachable ({exc}). Soul tip={tip}…. "
+                "Start OmniRoute on :20128 or check :status."
+            )
         self.kernel.soul.append("episodic", f"assistant: {reply}", meta={"role": "assistant"})
         return reply
 

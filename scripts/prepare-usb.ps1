@@ -52,11 +52,16 @@ if (-not (Test-Path "$Dest\.env")) {
 
 ROBIN_SERVE_COMPANION=1
 ROBIN_OPEN_BROWSER=1
+ROBIN_START_OMNIROUTE=1
+ROBIN_START_HERMES=0
 VOICE_HOST=127.0.0.1
 VOICE_PORT=8787
 TTS_PROVIDER=edge
 "@
 }
+
+Copy-Item "$Repo\scripts\start-omniroute.sh" "$Dest\start-omniroute.sh" -Force
+New-Item -ItemType Directory -Force -Path "$Dest\data\omniroute" | Out-Null
 
 New-Item -ItemType Directory -Force -Path "$Dest\data\home\.hermes" | Out-Null
 Copy-Item "$Repo\character\SOUL.md" "$Dest\data\home\.hermes\SOUL.md" -Force

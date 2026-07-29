@@ -90,11 +90,18 @@ if [[ ! -f "$DEST/.env" ]]; then
 # USB portable defaults
 ROBIN_SERVE_COMPANION=1
 ROBIN_OPEN_BROWSER=1
+ROBIN_START_OMNIROUTE=1
+ROBIN_START_HERMES=0
 VOICE_HOST=127.0.0.1
 VOICE_PORT=8787
 TTS_PROVIDER=edge
 EOF
 fi
+
+echo "==> OmniRoute helper"
+cp "$ROOT_REPO/scripts/start-omniroute.sh" "$DEST/start-omniroute.sh"
+chmod +x "$DEST/start-omniroute.sh"
+mkdir -p "$DEST/data/omniroute"
 
 # Seed character onto USB Hermes home if present later
 mkdir -p "$DEST/data/home/.hermes"

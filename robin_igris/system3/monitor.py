@@ -128,23 +128,30 @@ class ExecutiveMonitor:
     def _chat(self, messages: list[dict], chat_fn: Any | None) -> str:
         if chat_fn is not None:
             return chat_fn(messages)
+        # Primary LLM: OmniRoute (https://github.com/diegosouzapw/OmniRoute)
         try:
-            from robin_igris.hermes_client import chat as hermes_chat
+            from robin_igris.omniroute import chat_text
 
-            return hermes_chat(messages, session_key="robin-igris-system3")
+            return chat_text(messages)
         except Exception as exc:  # noqa: BLE001
-            # Fallback: local lightweight agent if Hermes is down
             try:
-                from robin_igris.agent import Agent
+                from robin_igris.hermes_client import chat as hermes_chat
 
-                agent = Agent(name=self.agent_name)
-                # Flatten to a single user turn with system preamble
-                sys_txt = messages[0]["content"]
-                user_txt = messages[-1]["content"]
-                agent.history[0]["content"] = sys_txt
-                return agent.chat(user_txt)
-            except Exception as exc2:  # noqa: BLE001
-                return f"Error contacting brain: hermes={exc}; fallback={exc2}"
+                return hermes_chat(messages, session_key="robin-igris-system3")
+            except Exception as exc_h:  # noqa: BLE001
+                try:
+                    from robin_igris.agent import Agent
+
+                    agent = Agent(name=self.agent_name)
+                    sys_txt = messages[0]["content"]
+                    user_txt = messages[-1]["content"]
+                    agent.history[0]["content"] = sys_txt
+                    return agent.chat(user_txt)
+                except Exception as exc2:  # noqa: BLE001
+                    return (
+                        f"Error contacting brain: omniroute={exc}; "
+                        f"hermes={exc_h}; fallback={exc2}"
+                    )
 
     def _appraise(
         self,

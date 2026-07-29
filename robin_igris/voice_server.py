@@ -37,9 +37,14 @@ class SpeechRequest(BaseModel):
 @app.get("/health")
 def health() -> dict:
     dist = os.getenv("ROBIN_COMPANION_DIST", "")
+    from robin_igris import omniroute
+
     return {
         "ok": True,
         "tts": os.getenv("TTS_PROVIDER", "edge"),
+        "llm": "omniroute",
+        "omniroute": omniroute.base_url(),
+        "omniroute_ok": omniroute.health(),
         "hermes": os.getenv("HERMES_BASE_URL", "http://127.0.0.1:8642/v1"),
         "companion": bool(dist and (Path(dist) / "index.html").exists()),
         "usb_root": os.getenv("ROBIN_USB_ROOT"),
@@ -114,6 +119,47 @@ def _hermes_key() -> str:
     return os.getenv("HERMES_API_KEY", os.getenv("VITE_HERMES_API_KEY", "robin-igris-dev"))
 
 
+def _omni_headers() -> dict[str, str]:
+    from robin_igris import omniroute
+
+    return {
+        "Authorization": f"Bearer {omniroute.api_key()}",
+        "Content-Type": "application/json",
+    }
+
+
+@app.api_route("/omniroute/{path:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])
+async def omniroute_proxy(path: str, request: Request) -> Response:
+    """Proxy to local OmniRoute gateway (LLM)."""
+    from robin_igris import omniroute
+
+    root = omniroute.base_url().removesuffix("/v1")
+    url = f"{root}/{path}"
+    headers = {
+        k: v
+        for k, v in request.headers.items()
+        if k.lower() not in {"host", "content-length"}
+    }
+    headers["Authorization"] = f"Bearer {omniroute.api_key()}"
+    body = await request.body()
+    try:
+        async with httpx.AsyncClient(timeout=120.0) as client:
+            r = await client.request(request.method, url, content=body, headers=headers)
+    except Exception as exc:  # noqa: BLE001
+        return JSONResponse(
+            {
+                "error": str(exc),
+                "hint": "Is OmniRoute running? npm i -g omniroute && omniroute  (port 20128)",
+            },
+            status_code=502,
+        )
+    return Response(
+        content=r.content,
+        status_code=r.status_code,
+        media_type=r.headers.get("content-type"),
+    )
+
+
 @app.api_route("/hermes/{path:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])
 async def hermes_proxy(path: str, request: Request) -> Response:
     url = f"{_hermes_root()}/{path}"
@@ -141,8 +187,34 @@ async def hermes_proxy(path: str, request: Request) -> Response:
 
 @app.post("/v1/chat/completions")
 async def chat_completions(request: Request) -> Response:
+    """Primary LLM path: OmniRoute → Hermes → System3/Agent fallback."""
     payload: dict[str, Any] = await request.json()
     messages = payload.get("messages") or []
+    if "model" not in payload or not payload.get("model"):
+        from robin_igris import omniroute
+
+        payload = {**payload, "model": omniroute.model()}
+
+    # 1) OmniRoute
+    try:
+        from robin_igris import omniroute
+
+        async with httpx.AsyncClient(timeout=120.0) as client:
+            r = await client.post(
+                f"{omniroute.base_url()}/chat/completions",
+                headers=_omni_headers(),
+                json=payload,
+            )
+            if r.is_success:
+                return Response(
+                    content=r.content,
+                    status_code=r.status_code,
+                    media_type="application/json",
+                )
+    except Exception:
+        pass
+
+    # 2) Optional Hermes
     try:
         async with httpx.AsyncClient(timeout=120.0) as client:
             r = await client.post(
