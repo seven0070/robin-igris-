@@ -48,7 +48,7 @@ class AgentShell:
             f"  absent (no stubs)   : {denied}",
             "",
             "  Unplug USB or Ctrl+C = intentional shutdown (soul sealed).",
-            "  :status :soul :goals :buzz :wifi :evolve :host :adapt :intel :papers :seed :sleep :novel :robin :kairn :flush :quit",
+            "  :status :soul :goals :buzz :wifi :evolve :host :adapt :intel :papers :seed :sleep :novel :robin :grok :kairn :flush :quit",
             "",
         ]
         return "\n".join(lines)
@@ -162,6 +162,29 @@ class AgentShell:
             if q == "overnight":
                 return json.dumps(self.kernel.pendrive_native.consolidate(), indent=2, default=str)
             return json.dumps(self.kernel.pendrive_native.ask(q), indent=2, default=str)
+        if text == ":grok":
+            try:
+                from robin_igris.grok_build import GrokBuildClient
+
+                return json.dumps(GrokBuildClient.detect().status(), indent=2, default=str)
+            except Exception as exc:  # noqa: BLE001
+                return json.dumps({"error": str(exc)})
+        if text.startswith(":grok "):
+            try:
+                from robin_igris.grok_build import GrokBuildClient
+
+                prompt = text[len(":grok ") :].strip()
+                client = GrokBuildClient.detect()
+                cwd = self.kernel.root / "app"
+                if not cwd.exists():
+                    cwd = self.kernel.root
+                return json.dumps(
+                    client.run_headless(prompt, cwd=cwd),
+                    indent=2,
+                    default=str,
+                )
+            except Exception as exc:  # noqa: BLE001
+                return json.dumps({"error": str(exc)})
         if text == ":wifi":
             if not self.kernel.wifi:
                 return json.dumps({"error": "no wifi contract"})
