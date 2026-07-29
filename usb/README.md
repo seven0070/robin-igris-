@@ -31,6 +31,18 @@ Format **exFAT** (Win/macOS/Linux) or **NTFS** (Windows-only).
 
 ## One-time prepare
 
+**One-click (recommended):**
+
+| OS | Action |
+|----|--------|
+| Windows | Double-click **`INSTALL_TO_USB.bat`** in the repo |
+| macOS | Double-click **`INSTALL_TO_USB.command`** |
+| Linux | `./INSTALL_TO_USB.sh` |
+
+Auto-detects the pendrive and creates `ROBIN_IGRIS/` on it. Details: [docs/ONE_CLICK_USB.md](../docs/ONE_CLICK_USB.md).
+
+**Manual:**
+
 ```bash
 ./scripts/prepare-usb.sh /path/to/USB/ROBIN_IGRIS
 # Windows: .\scripts\prepare-usb.ps1 E:\ROBIN_IGRIS
@@ -44,7 +56,7 @@ Edit `USB/ROBIN_IGRIS/.env` (API keys). Eject.
 1. Plug in USB
 2. Ensure OmniRoute is available on the host (`npm i -g omniroute`) — LAUNCH starts it
 3. Double-click **`AOS_BOOT.bat`** (Windows) or run **`./aos-boot.sh`**
-4. Avatar / CLI shell talks through OmniRoute (`:20128`)
+4. Shell: `:robin` (pendrive mind) · OmniRoute on `:20128`
 5. Ctrl+C or STOP → soul seals → eject (unplug = intentional shutdown)
 
 **Companion mode:** `LAUNCH.bat` / `launch.sh` (starts OmniRoute + voice + Live2D).
