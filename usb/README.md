@@ -1,70 +1,60 @@
 # Robin Igris — 128GB USB Pendrive Kit
 
-Plug the drive into **any PC**. The agent runs **from the USB**; the PC is only the **display + keyboard/mic**.
+Plug the drive into **any PC**. Two modes:
+
+| Mode | Entry | Meaning |
+|------|-------|---------|
+| **Companion** | `LAUNCH.bat` / `launch.sh` | App on stick, PC as display |
+| **Agent OS** | `AOS_BOOT.bat` / `aos-boot.sh` | **Agent is the OS shell** — no desktop UX |
 
 ```
 ┌───────────── 128GB USB ─────────────┐     ┌────── Host PC ──────┐
-│  runtime (Python)                   │     │  Monitor (browser)  │
-│  app (Robin + System 3 + CADVP)     │────▶│  Speakers / Mic     │
-│  data (memory, journal, skills)     │     │  (no install needed)│
-│  companion-dist (Live2D UI)         │     └─────────────────────┘
-└─────────────────────────────────────┘
+│  AOS control plane (manifest/soul)  │     │  Borrowed display   │
+│  Soul Merkle-DAG (identity+memory)  │────▶│  Borrowed mic/spk   │
+│  Companion avatar = the shell       │     │  (discovered fresh) │
+└─────────────────────────────────────┘     └─────────────────────┘
 ```
+
+See [docs/research/PENDRIVE_AGENT_OS.md](../docs/research/PENDRIVE_AGENT_OS.md).
 
 ## Space budget (128GB)
 
 | Slice | Size | Contents |
 |-------|------|----------|
-| App + companion build | ~1–2 GB | Code, Live2D assets, Cubism |
-| Portable Python + deps | ~1–2 GB | Runtime on the stick |
-| Hermes (optional) | ~2–5 GB | Agent brain on stick (`data/home/.hermes`) |
-| Working data | ~5–20 GB | Journal, skills, delivery bus, logs |
-| Free / models / media | **rest (~100GB)** | Local models, VRM packs, backups |
+| App + companion + AOS | ~1–2 GB | Code, Live2D, control plane |
+| Portable Python | ~1–2 GB | Runtime on the stick |
+| Live ISO (optional) | ~2–4 GB | True boot-from-USB (Ventoy) |
+| Soul + System 3 data | grows | Journal, Merkle DAG, skills |
+| Free / models | **~100GB** | Local LLMs, media |
 
-Format the stick **exFAT** (works on Windows + macOS + Linux) or **NTFS** if Windows-only.
+Format **exFAT** (Win/macOS/Linux) or **NTFS** (Windows-only).
 
-## One-time prepare (on a machine with internet)
-
-1. Mount / plug the empty 128GB drive (example mount: `/Volumes/ROBIN` or `E:\`).
-2. From this repo:
+## One-time prepare
 
 ```bash
-# Linux / macOS
 ./scripts/prepare-usb.sh /path/to/USB/ROBIN_IGRIS
-
-# Windows (PowerShell, from repo)
-.\scripts\prepare-usb.ps1 E:\ROBIN_IGRIS
+# Windows: .\scripts\prepare-usb.ps1 E:\ROBIN_IGRIS
 ```
 
-3. Edit `USB/ROBIN_IGRIS/.env` — add API keys (`OPENAI_API_KEY` or Hermes provider keys).
-4. Safely eject. Done.
+Edit `USB/ROBIN_IGRIS/.env` (API keys). Eject.
 
-## Every day (any PC)
+## Daily use
 
-1. Plug in the USB.
-2. Double-click:
-   - **Windows:** `LAUNCH.bat`
-   - **macOS:** `LAUNCH.command` (right-click → Open the first time)
-   - **Linux:** `./launch.sh`
-3. Browser opens to `http://127.0.0.1:8787` — Live2D + chat + voice.
-4. When finished: close the launcher window or run `STOP.bat` / `./stop.sh`, then eject.
+**Agent OS mode (recommended for the “OS on a stick” vision):**
+1. Plug in USB
+2. Double-click **`AOS_BOOT.bat`** (Windows) or run **`./aos-boot.sh`**
+3. Avatar shell opens — that *is* the OS UI
+4. Ctrl+C or STOP → soul seals → eject (unplug = intentional shutdown)
 
-Nothing permanent is installed on the host (except OS may cache browser data). All memory stays on the stick.
+**Companion mode:** `LAUNCH.bat` / `launch.sh` (same stick, lighter).
 
-## Optional: Hermes brain on the stick
+## Live USB (boot the PC from the stick)
 
-If `hermes` is available while preparing, the prepare script can install Hermes with `HOME` pointed at the USB so the whole brain lives on the drive:
-
-```bash
-export HOME="/path/to/USB/ROBIN_IGRIS/data/home"
-curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash
-# then configure API_SERVER_* as in the main README
-```
-
-Without Hermes, the stick still runs: companion UI + voice + System 3 + local fallback agent.
+See [scripts/build-liveusb-notes.md](../scripts/build-liveusb-notes.md) — Ventoy + Debian Live
+auto-login into `aos-boot.sh` so there is no desktop, only the agent.
 
 ## Safety
 
-- Do not yank the drive while LAUNCH is running.
-- Keep a backup of `data/` (journal + CADVP inbox = your agent’s memory).
-- Modern Windows blocks `autorun.inf`; always double-click `LAUNCH.bat`.
+- Prefer STOP/Ctrl+C before yanking (seals Merkle tip).
+- Backup `data/aos/soul/` — that is the cryptographic identity.
+- Modern Windows blocks autorun; always double-click the launcher.

@@ -78,8 +78,10 @@ cp "$ROOT_REPO/usb/stop.sh" "$DEST/stop.sh"
 cp "$ROOT_REPO/usb/LAUNCH.bat" "$DEST/LAUNCH.bat"
 cp "$ROOT_REPO/usb/STOP.bat" "$DEST/STOP.bat"
 cp "$ROOT_REPO/usb/LAUNCH.command" "$DEST/LAUNCH.command"
+cp "$ROOT_REPO/usb/aos-boot.sh" "$DEST/aos-boot.sh"
+cp "$ROOT_REPO/usb/AOS_BOOT.bat" "$DEST/AOS_BOOT.bat"
 cp "$ROOT_REPO/usb/README.md" "$DEST/README.md"
-chmod +x "$DEST/launch.sh" "$DEST/stop.sh" "$DEST/LAUNCH.command"
+chmod +x "$DEST/launch.sh" "$DEST/stop.sh" "$DEST/LAUNCH.command" "$DEST/aos-boot.sh"
 
 if [[ ! -f "$DEST/.env" ]]; then
   cp "$ROOT_REPO/.env.example" "$DEST/.env"
@@ -99,10 +101,15 @@ mkdir -p "$DEST/data/home/.hermes"
 cp "$ROOT_REPO/character/SOUL.md" "$DEST/data/home/.hermes/SOUL.md"
 cp "$ROOT_REPO/character/SOUL.md" "$DEST/data/system3/SOUL.md" 2>/dev/null || true
 
+# Initialize Pendrive-Native Agent OS soul + manifest
+echo "==> Initializing AOS soul"
+PYTHONPATH="$DEST/app" "$DEST/runtime/venv/bin/python" -m aos init --root "$DEST" || true
+
 echo ""
 echo "USB kit ready at: $DEST"
 echo "Next:"
 echo "  1) Edit $DEST/.env (API keys)"
 echo "  2) Eject safely"
-echo "  3) On any PC: open LAUNCH.bat / launch.sh"
+echo "  3) Companion: LAUNCH.bat / launch.sh"
+echo "  4) Agent OS:  AOS_BOOT.bat / aos-boot.sh"
 du -sh "$DEST" 2>/dev/null || true

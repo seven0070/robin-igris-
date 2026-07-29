@@ -42,6 +42,8 @@ Copy-Item "$Repo\usb\STOP.bat" "$Dest\STOP.bat" -Force
 Copy-Item "$Repo\usb\launch.sh" "$Dest\launch.sh" -Force
 Copy-Item "$Repo\usb\stop.sh" "$Dest\stop.sh" -Force
 Copy-Item "$Repo\usb\LAUNCH.command" "$Dest\LAUNCH.command" -Force
+Copy-Item "$Repo\usb\AOS_BOOT.bat" "$Dest\AOS_BOOT.bat" -Force
+Copy-Item "$Repo\usb\aos-boot.sh" "$Dest\aos-boot.sh" -Force
 Copy-Item "$Repo\usb\README.md" "$Dest\README.md" -Force
 
 if (-not (Test-Path "$Dest\.env")) {
@@ -59,5 +61,9 @@ TTS_PROVIDER=edge
 New-Item -ItemType Directory -Force -Path "$Dest\data\home\.hermes" | Out-Null
 Copy-Item "$Repo\character\SOUL.md" "$Dest\data\home\.hermes\SOUL.md" -Force
 
+Write-Host "==> Initializing AOS soul"
+$env:PYTHONPATH = "$Dest\app"
+& "$Dest\runtime\venv\Scripts\python.exe" -m aos init --root "$Dest"
+
 Write-Host "USB kit ready at $Dest"
-Write-Host "Edit .env then use LAUNCH.bat on any PC"
+Write-Host "Edit .env then use AOS_BOOT.bat (Agent OS) or LAUNCH.bat (companion)"

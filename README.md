@@ -56,21 +56,25 @@ python -m robin_igris.system3.cli deliver "fact: deploys happen on Fridays"
 ```
 character/SOUL.md
 companion/                 AIRI Live2D stage
+aos/                       Pendrive-Native Agent OS (manifest/soul/octopus)
 robin_igris/system3/       OpenLife/Sophia/OpenSkill layer
 robin_igris/voice_server.py
 docs/research/FOUNDATIONS.md
+docs/research/PENDRIVE_AGENT_OS.md
+usb/                       Pendrive launchers (LAUNCH + AOS_BOOT)
 ```
 
-## USB pendrive (128GB)
+## USB pendrive (128GB) — Agent OS
 
-Run entirely from a stick — the PC is only the display:
+The stick is home; the PC is borrowed hardware; **the agent is the shell**.
 
 ```bash
 ./scripts/prepare-usb.sh /path/to/USB/ROBIN_IGRIS
-# then on any PC: double-click LAUNCH.bat / ./launch.sh
+# then: AOS_BOOT.bat  or  ./aos-boot.sh
 ```
 
-See [usb/README.md](usb/README.md).
+Design paper: [docs/research/PENDRIVE_AGENT_OS.md](docs/research/PENDRIVE_AGENT_OS.md)  
+Kit guide: [usb/README.md](usb/README.md)
 
 ## License
 MIT — see [LICENSE](LICENSE). Cubism SDK is subject to Live2D’s license (fetched at build).

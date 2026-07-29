@@ -1,0 +1,138 @@
+"""Manifest-Only Runtime (AgenticOS-inspired): undeclared capabilities do not exist."""
+
+from __future__ import annotations
+
+import json
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any
+
+try:
+    import yaml  # type: ignore
+except ImportError:  # pragma: no cover
+    yaml = None
+
+
+DEFAULT_MANIFEST = {
+    "name": "robin-igris",
+    "version": 1,
+    "intent": "Persistent companion agent; host PC is borrowed peripherals.",
+    "capabilities": {
+        "display": True,
+        "audio_out": True,
+        "audio_in": True,
+        "network": True,
+        "filesystem_soul": True,
+        "filesystem_host": False,
+        "shell_exec": False,
+        "camera": False,
+        "gpu": False,
+    },
+    "goals": [
+        {"id": "presence", "text": "Remain available to the user via avatar shell"},
+        {"id": "continuity", "text": "Preserve soul across unplug/replug"},
+        {"id": "honesty", "text": "Never invent tool results; declare capability gaps"},
+    ],
+}
+
+
+@dataclass
+class Manifest:
+    name: str
+    version: int
+    intent: str
+    capabilities: dict[str, bool] = field(default_factory=dict)
+    goals: list[dict[str, str]] = field(default_factory=list)
+    raw: dict[str, Any] = field(default_factory=dict)
+
+    @classmethod
+    def default(cls) -> "Manifest":
+        return cls.from_dict(DEFAULT_MANIFEST)
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "Manifest":
+        return cls(
+            name=str(data.get("name", "agent")),
+            version=int(data.get("version", 1)),
+            intent=str(data.get("intent", "")),
+            capabilities=dict(data.get("capabilities") or {}),
+            goals=list(data.get("goals") or []),
+            raw=data,
+        )
+
+    @classmethod
+    def load(cls, path: Path) -> "Manifest":
+        path = Path(path)
+        text = path.read_text(encoding="utf-8")
+        if path.suffix in {".yaml", ".yml"}:
+            if yaml is None:
+                raise RuntimeError("PyYAML required for YAML manifests; use JSON or install pyyaml")
+            data = yaml.safe_load(text) or {}
+        else:
+            data = json.loads(text)
+        return cls.from_dict(data)
+
+    def save(self, path: Path) -> None:
+        path = Path(path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        payload = {
+            "name": self.name,
+            "version": self.version,
+            "intent": self.intent,
+            "capabilities": self.capabilities,
+            "goals": self.goals,
+        }
+        if path.suffix in {".yaml", ".yml"} and yaml is not None:
+            path.write_text(yaml.safe_dump(payload, sort_keys=False), encoding="utf-8")
+        else:
+            path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+
+    def allows(self, capability: str) -> bool:
+        return bool(self.capabilities.get(capability, False))
+
+
+@dataclass
+class ManifestRuntime:
+    """Synthesize an effective capability set: Manifest ∩ Hardware."""
+
+    manifest: Manifest
+    hardware: dict[str, Any] = field(default_factory=dict)
+    effective: dict[str, bool] = field(default_factory=dict)
+
+    def synthesize(self, hardware: dict[str, Any] | None = None) -> dict[str, bool]:
+        self.hardware = hardware or self.hardware
+        hw = self.hardware
+        m = self.manifest.capabilities
+        # Hardware gates — Octopus discoveries shrink the capsule
+        gated = {
+            "display": m.get("display", False) and bool(hw.get("has_display", True)),
+            "audio_out": m.get("audio_out", False) and bool(hw.get("has_audio_out", True)),
+            "audio_in": m.get("audio_in", False) and bool(hw.get("has_audio_in", False)),
+            "network": m.get("network", False) and bool(hw.get("has_network", False)),
+            "filesystem_soul": m.get("filesystem_soul", True),
+            "filesystem_host": m.get("filesystem_host", False),
+            "shell_exec": m.get("shell_exec", False),
+            "camera": m.get("camera", False) and bool(hw.get("has_camera", False)),
+            "gpu": m.get("gpu", False) and bool(hw.get("has_gpu", False)),
+        }
+        self.effective = gated
+        return gated
+
+    def require(self, capability: str) -> None:
+        if not self.effective.get(capability, False):
+            raise PermissionError(
+                f"Capability '{capability}' absent from Manifest∩Hardware capsule "
+                f"(AgenticOS Manifest-Only Runtime)."
+            )
+
+    def context_prompt(self) -> str:
+        caps = ", ".join(k for k, v in sorted(self.effective.items()) if v) or "(none)"
+        denied = ", ".join(k for k, v in sorted(self.effective.items()) if not v) or "(none)"
+        goals = "\n".join(f"- {g.get('id')}: {g.get('text')}" for g in self.manifest.goals)
+        return (
+            f"## Manifest capsule ({self.manifest.name})\n"
+            f"Intent: {self.manifest.intent}\n"
+            f"Effective capabilities: {caps}\n"
+            f"Absent (no stubs): {denied}\n"
+            f"Goals:\n{goals}\n"
+        )
