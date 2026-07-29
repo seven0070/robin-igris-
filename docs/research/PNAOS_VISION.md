@@ -199,6 +199,13 @@ allow. The goal is not “match GPT-5 on trivia” — it is to exceed frontier 
 
 See [docs/INTELLIGENCE_STACK.md](../INTELLIGENCE_STACK.md). Shell: `:intel` · `:papers`.
 
+### Lived Seed (different learning mechanism)
+
+A blank model that learns from *being with you* — Hebbian + STDP + overnight
+consolidation, not gradient descent on internet text. OmniRoute answers now;
+the seed grows uniquely on the pendrive. See [docs/LIVED_SEED.md](../LIVED_SEED.md).
+Shell: `:seed` · `:sleep`.
+
 Self-evolution needs languages *born* for agents, not ported from app stacks:
 
 | Language | Role |

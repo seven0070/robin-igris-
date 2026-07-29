@@ -107,6 +107,32 @@ def curation_export(kind: str = "sft") -> str:
     return _ok({"export": str(path), "status": _stack().curation.status()})
 
 
+def _seed():
+    root = os.getenv("ROBIN_USB_ROOT") or os.getenv("AOS_USB_ROOT") or "."
+    from robin_igris.lived_seed import LivedSeed
+
+    return LivedSeed.create(Path(root))
+
+
+def lived_status() -> str:
+    return _ok(_seed().status())
+
+
+def lived_ask(text: str) -> str:
+    return _ok({"reply": _seed().ask(text)})
+
+
+def lived_sleep(budget: int = 40) -> str:
+    return _ok(_seed().sleep(budget=int(budget)))
+
+
+def lived_teach(user_text: str, fact: str, outcome: str = "user_satisfied") -> str:
+    """Explicit teaching episode — strengthens Hebbian links without OmniRoute."""
+    seed = _seed()
+    exp = seed.observe_turn(user_text, fact, outcome=outcome, source="teach")
+    return _ok({"taught": exp.id, "concepts": exp.linked_concepts, "novelty": exp.novelty})
+
+
 TOOL_IMPLS: dict[str, Callable[..., str]] = {
     "intel_status": intel_status,
     "paper_ingest": paper_ingest,
@@ -115,6 +141,10 @@ TOOL_IMPLS: dict[str, Callable[..., str]] = {
     "capability_rank": capability_rank,
     "curation_add_sft": curation_add_sft,
     "curation_export": curation_export,
+    "lived_status": lived_status,
+    "lived_ask": lived_ask,
+    "lived_sleep": lived_sleep,
+    "lived_teach": lived_teach,
 }
 
 TOOL_SCHEMAS: list[dict[str, Any]] = [
@@ -208,6 +238,53 @@ TOOL_SCHEMAS: list[dict[str, Any]] = [
                 "properties": {
                     "kind": {"type": "string", "description": "sft|prefs", "default": "sft"},
                 },
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "lived_status",
+            "description": "Status of the blank Lived Seed (Hebbian/STDP experience learner).",
+            "parameters": {"type": "object", "properties": {}},
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "lived_ask",
+            "description": "Ask the Lived Seed only (no OmniRoute). Blank until it has lived enough.",
+            "parameters": {
+                "type": "object",
+                "properties": {"text": {"type": "string"}},
+                "required": ["text"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "lived_sleep",
+            "description": "Run overnight consolidation: replay, prune, synthesize (not gradient descent).",
+            "parameters": {
+                "type": "object",
+                "properties": {"budget": {"type": "integer", "default": 40}},
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "lived_teach",
+            "description": "Teach the Lived Seed a fact as a structured experience episode.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "user_text": {"type": "string"},
+                    "fact": {"type": "string"},
+                    "outcome": {"type": "string", "default": "user_satisfied"},
+                },
+                "required": ["user_text", "fact"],
             },
         },
     },

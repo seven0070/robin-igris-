@@ -68,6 +68,10 @@ DEFAULT_MANIFEST = {
         "capability_rank": True,
         "curation_add_sft": True,
         "curation_export": True,
+        "lived_status": True,
+        "lived_ask": True,
+        "lived_sleep": True,
+        "lived_teach": True,
     },
     "host_control": {
         "enabled": False,
@@ -150,6 +154,12 @@ DEFAULT_MANIFEST = {
         "curation": True,
         "note": "Local model = private + uncensored; cloud spillover under WiFi+Manifest only",
     },
+    "lived_seed": {
+        "enabled": True,
+        "dual_track": True,
+        "mechanism": "hebbian+stdp+consolidation",
+        "note": "Blank experience learner — not backprop. OmniRoute answers now; seed grows uniquely.",
+    },
     "wifi": {
         "default": "deny",
         "networks": [
@@ -225,7 +235,16 @@ class Manifest:
             "capabilities": self.capabilities,
             "goals": self.goals,
         }
-        for key in ("budget", "routing", "tools", "wifi", "host_control", "adaptability", "intelligence"):
+        for key in (
+            "budget",
+            "routing",
+            "tools",
+            "wifi",
+            "host_control",
+            "adaptability",
+            "intelligence",
+            "lived_seed",
+        ):
             if self.raw.get(key) is not None:
                 payload[key] = self.raw[key]
         if path.suffix in {".yaml", ".yml"} and yaml is not None:

@@ -48,7 +48,7 @@ class AgentShell:
             f"  absent (no stubs)   : {denied}",
             "",
             "  Unplug USB or Ctrl+C = intentional shutdown (soul sealed).",
-            "  :status :soul :goals :buzz :wifi :evolve :host :adapt :intel :papers :kairn :flush :quit",
+            "  :status :soul :goals :buzz :wifi :evolve :host :adapt :intel :papers :seed :sleep :kairn :flush :quit",
             "",
         ]
         return "\n".join(lines)
@@ -126,6 +126,19 @@ class AgentShell:
                 indent=2,
                 default=str,
             )
+        if text == ":seed":
+            if not self.kernel.lived_seed:
+                return json.dumps({"error": "no lived seed"})
+            return json.dumps(self.kernel.lived_seed.status(), indent=2, default=str)
+        if text.startswith(":seed "):
+            if not self.kernel.lived_seed:
+                return json.dumps({"error": "no lived seed"})
+            q = text[len(":seed ") :].strip()
+            return self.kernel.lived_seed.ask(q)
+        if text == ":sleep":
+            if not self.kernel.lived_seed:
+                return json.dumps({"error": "no lived seed"})
+            return json.dumps(self.kernel.lived_seed.sleep(), indent=2, default=str)
         if text == ":wifi":
             if not self.kernel.wifi:
                 return json.dumps({"error": "no wifi contract"})
@@ -232,6 +245,17 @@ class AgentShell:
                 f"[AOS] OmniRoute unreachable ({exc}). Soul tip={tip}…. "
                 "Start OmniRoute on :20128; for offline, register a local provider."
             )
+        # Dual-track: lived seed observes every turn (Hebbian/STDP online update)
+        if self.kernel.lived_seed and getattr(self.kernel.lived_seed, "enabled", True):
+            try:
+                self.kernel.lived_seed.observe_turn(
+                    text,
+                    reply,
+                    outcome="unclear",
+                    source="omniroute" if "OmniRoute unreachable" not in reply else "fallback",
+                )
+            except Exception:
+                pass
         self.kernel.soul.append("episodic", f"assistant: {reply}", meta={"role": "assistant"})
         return reply
 
