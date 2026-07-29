@@ -192,7 +192,13 @@ PNAOS keeps **private soul on the stick** and puts **shared tasks, threads, and
 artifacts** on Buzz via Manifest-scoped `buzz_*` tools (Semantic Boundary Gateway —
 no raw sockets for the agent). See `docs/BUZZ.md`.
 
-### 4.10 Honesty bound (kernel vs metaphor)
+### 4.11 Languages (Aergon & Kairn)
+
+Self-evolution requires languages designed for agents: **Aergon** (systems,
+capability types in codegen, hot-swap ABI) and **Kairn** (agent-written skills,
+Manifest-as-syntax, mandatory tests, sandboxed bytecode). See `docs/languages/`.
+
+### 4.12 Honesty bound (kernel vs metaphor)
 
 A full replacement of Linux/Windows kernels is out of scope for the reference system. PNAOS is specified as a **userspace Agent OS** that:
 

@@ -81,8 +81,24 @@ class EvolutionStore:
         path.write_text(json.dumps(blob, indent=2), encoding="utf-8")
         return blob
 
+    def promote_kairn(self, source_path: Path, *, manifest_caps: dict[str, bool]) -> dict[str, Any]:
+        """Compile+test a .kairn skill and promote into the evolving shell if verified."""
+        from languages.kairn import compile_file, promote_to_evolution
+
+        res = compile_file(Path(source_path), manifest_path=None)
+        # re-verify with explicit caps
+        from languages.kairn import compile_skill
+
+        src = Path(source_path).read_text(encoding="utf-8")
+        res = compile_skill(src, manifest_caps=manifest_caps)
+        if not res.ok:
+            return {"promoted": False, "errors": res.errors, "tests": res.test_results}
+        return promote_to_evolution(res, self.root)
+
     def list_skills(self) -> list[str]:
-        return sorted(p.stem for p in (self.root / "skills").glob("*.md"))
+        names = {p.stem for p in (self.root / "skills").glob("*.md")}
+        names |= {p.stem for p in (self.root / "skills").glob("*.kbc")}
+        return sorted(names)
 
     def status(self) -> dict[str, Any]:
         latest = self.root / "checkpoints" / "LATEST"

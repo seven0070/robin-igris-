@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 from typing import Any
 
 from aos.kernel import AgentKernel
@@ -47,7 +48,7 @@ class AgentShell:
             f"  absent (no stubs)   : {denied}",
             "",
             "  Unplug USB or Ctrl+C = intentional shutdown (soul sealed).",
-            "  :status :soul :goals :buzz :wifi :evolve :flush :quit",
+            "  :status :soul :goals :buzz :wifi :evolve :kairn :flush :quit",
             "",
         ]
         return "\n".join(lines)
@@ -133,6 +134,19 @@ class AgentShell:
                 "check_buzz": lambda p: {"ok": True, "payload": p},
             }
             return json.dumps(self.kernel.flush_queue(handlers), indent=2, default=str)
+        if text.startswith(":kairn "):
+            # :kairn path/to/skill.kairn
+            if not self.kernel.evolution:
+                return json.dumps({"error": "no evolution store"})
+            path = Path(text[len(":kairn ") :].strip())
+            caps = dict(self.kernel.runtime.effective)
+            # also pass raw capability flags from manifest
+            caps.update({k: bool(v) for k, v in self.kernel.manifest.capabilities.items()})
+            return json.dumps(
+                self.kernel.evolution.promote_kairn(path, manifest_caps=caps),
+                indent=2,
+                default=str,
+            )
         if text.startswith(":cap "):
             name = text[5:].strip()
             try:

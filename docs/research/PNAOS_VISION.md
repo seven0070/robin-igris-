@@ -172,7 +172,16 @@ The paradigm: **kernel smallest, agent identity largest.** Every decision asks:
 
 ---
 
-## Implementation map in this repo
+## Languages — Aergon & Kairn
+
+Self-evolution needs languages *born* for agents, not ported from app stacks:
+
+| Language | Role |
+|----------|------|
+| **Aergon** | Systems: capability types compiled into binaries; hot-swap modules; ~200 KB core |
+| **Kairn** | Skills: agent-written, Manifest-as-syntax, required tests, sandboxed bytecode |
+
+See [docs/languages/README.md](../languages/README.md). Prototypes live in `languages/`.
 
 | Module | Axiom |
 |--------|-------|

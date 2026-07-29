@@ -1,0 +1,19 @@
+skill summarize_paper(paper: Document) -> Summary
+    requires: [model.local, mem.episodic]
+    produces: [artifact.text]
+    budget: 0.001
+
+    steps:
+        load paper into ctx
+        call model.local.infer("summarize", ctx) into result
+        save result as Summary to mem.episodic
+        return result
+
+    test "handles empty document"
+        input: Document("")
+        expect: Summary.is_valid
+        budget: 0.0001
+
+    test "handles typical paper"
+        input: Document("We propose a novel architecture for pendrive agents...")
+        expect: Summary.length > 20

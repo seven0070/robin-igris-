@@ -72,7 +72,10 @@ robin_igris/system3/       OpenLife/Sophia/OpenSkill layer
 robin_igris/voice_server.py
 docs/research/FOUNDATIONS.md
 docs/research/PENDRIVE_AGENT_OS.md
+docs/research/PNAOS_VISION.md
+docs/languages/          Aergon (systems) + Kairn (skills)
 usb/                       Pendrive launchers (LAUNCH + AOS_BOOT)
+languages/                 Language prototypes
 ```
 
 ## USB pendrive (128GB) — Agent OS
