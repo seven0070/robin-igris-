@@ -7,6 +7,8 @@ the host PC is borrowed peripherals.
 > (3) agent-as-shell UI, (4) unplug-as-intentional-shutdown, and (5) cryptographic soul-on-stick.
 > Prior work supplies the pieces; PNAOS is the composition.
 
+**Full paper draft:** [PNAOS_PAPER.md](PNAOS_PAPER.md)
+
 ## Research lineage
 
 | Paper | ID | Borrowed idea |
@@ -16,8 +18,11 @@ the host PC is borrowed peripherals.
 | [Portable Agent Memory](https://www.alphaxiv.org/abs/2605.11032) | 2605.11032 | Five-component soul; Merkle-DAG provenance; cross-host continuity |
 | [Octopus Protocol](https://www.alphaxiv.org/abs/2605.09055) | 2605.09055 | One-shot hardware discovery → Infrastructure-as-Prompts |
 | [Qualixar OS](https://www.alphaxiv.org/abs/2604.06392) | 2604.06392 | Design philosophy: OS built *for* agents |
+| [AOHP](https://www.alphaxiv.org/abs/2606.23449) | 2606.23449 | Agent as OS-level service / harness |
 | [Channel Fracture / CADVP](https://www.alphaxiv.org/abs/2606.04896v2) | 2606.04896 | Delivery verification; never trust silent scheduled writes |
 | OpenLife / Sophia / OpenSkill | 2606.31046 / 2512.18202 / 2606.06741 | Persistence, System 3, skill evolution |
+
+Each paper solves **one piece**. None combine USB boot + borrowed host + agent-as-shell + unplug shutdown + soul-on-stick. See the paper draft for the full “what it doesn’t do” table and gap claim.
 
 ## Five axioms (the gap)
 

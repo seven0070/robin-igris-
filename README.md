@@ -83,6 +83,7 @@ The stick is home; the PC is borrowed hardware; **the agent is the shell**.
 ```
 
 Design paper: [docs/research/PENDRIVE_AGENT_OS.md](docs/research/PENDRIVE_AGENT_OS.md)  
+Research write-up: [docs/research/PNAOS_PAPER.md](docs/research/PNAOS_PAPER.md)  
 Kit guide: [usb/README.md](usb/README.md)
 
 ## License
