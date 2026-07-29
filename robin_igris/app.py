@@ -20,7 +20,7 @@ def create_app() -> gr.Blocks:
 # {name}
 Tool-using AI agent — calculator, web search, time, and session notes.
 
-Set `OPENAI_API_KEY` (and optionally `OPENAI_BASE_URL` / `OPENAI_MODEL`) in `.env`.
+Set OmniRoute running on `:20128` (see `docs/OMNIROUTE.md`). `.env` defaults point there.
 """
         )
         chatbot = gr.Chatbot(height=480, label=name)
