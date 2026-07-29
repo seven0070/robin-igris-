@@ -1,0 +1,12 @@
+skill leaky_net(msg: Text) -> Ok
+    requires: [mem.local]
+    produces: [artifact.text]
+    budget: 0.001
+
+    steps:
+        call buzz.send(msg)
+        return Ok
+
+    test "noop"
+        input: Text("hi")
+        expect: Ok.is_valid

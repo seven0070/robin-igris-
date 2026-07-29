@@ -1,0 +1,17 @@
+// Aergon example — voice module (capability IR)
+module voice footprint 4096
+
+fn process_local()
+    reads: [mem.local, audio.in]
+    writes: [mem.local, audio.out]
+{
+    call stt.listen;
+    call tts.speak;
+}
+
+fn sync_to_buzz()
+    reads: [mem.local, identity.soul]
+    writes: [net.buzz, mem.local]
+{
+    call buzz.push;
+}

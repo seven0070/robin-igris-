@@ -1,0 +1,28 @@
+{
+  "name": "robin-igris-companion",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "predev": "node scripts/ensure-live2d.mjs",
+    "prebuild": "node scripts/ensure-live2d.mjs",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "ensure-live2d": "node scripts/ensure-live2d.mjs"
+  },
+  "dependencies": {
+    "pixi-live2d-display": "^0.4.0",
+    "pixi.js": "^7.4.2",
+    "vue": "^3.5.13"
+  },
+  "devDependencies": {
+    "@proj-airi/unplugin-fetch": "^0.2.3",
+    "@proj-airi/unplugin-live2d-sdk": "^0.1.7",
+    "@vitejs/plugin-vue": "^6.0.0",
+    "typescript": "^5.7.3",
+    "vite": "^7.0.0",
+    "vue-tsc": "^2.2.0",
+    "yauzl": "^3.4.0"
+  }
+}
