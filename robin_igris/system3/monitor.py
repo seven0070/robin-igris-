@@ -8,13 +8,14 @@ from pathlib import Path
 from typing import Any
 
 from robin_igris.system3.budget import Metabolism
+from robin_igris.system3.cadvp import Channel, DeliveryBus
 from robin_igris.system3.heartbeat import Heartbeat, IntrinsicDrive
 from robin_igris.system3.journal import GrowthJournal
 
 
 @dataclass
 class ExecutiveMonitor:
-    """Meta-cognitive loop: context → Hermes → appraisal → journal / budget."""
+    """Meta-cognitive loop: context → Hermes → appraisal → journal / CADVP delivery."""
 
     agent_name: str = field(
         default_factory=lambda: os.getenv("AGENT_NAME", "Robin Igris")
@@ -24,6 +25,7 @@ class ExecutiveMonitor:
     journal: GrowthJournal = field(init=False)
     metabolism: Metabolism = field(init=False)
     heartbeat: Heartbeat = field(init=False)
+    bus: DeliveryBus = field(init=False)
 
     def __post_init__(self) -> None:
         self.data_root = Path(self.data_root)
@@ -31,6 +33,7 @@ class ExecutiveMonitor:
         self.journal.ensure_defaults(self.agent_name)
         self.metabolism = Metabolism(path=self.data_root / "metabolism.json")
         self.heartbeat = Heartbeat()
+        self.bus = DeliveryBus(self.data_root / "delivery")
 
     def build_system_context(self) -> str:
         status = self.metabolism.status()
@@ -75,12 +78,42 @@ class ExecutiveMonitor:
             )
             return reply
 
+        ep_kind = kind if drive is None else f"intrinsic:{drive.value}"
         self.journal.append_episode(
-            kind=kind if drive is None else f"intrinsic:{drive.value}",
+            kind=ep_kind,
             summary=reply[:800],
             appraisal=appraisal,
             goal=user_text[:200],
         )
+
+        # Heartbeat / scheduled wakes must NOT use Hermes cron memory (Channel C
+        # fracture: skip_memory=True). Persist via CADVP Channel A + inverse verify.
+        if kind in {"heartbeat", "cron", "scheduled"} or drive is not None:
+            receipt = self.bus.deliver(
+                target=self.agent_name.replace(" ", "-").lower(),
+                kind=ep_kind,
+                content=reply[:2000],
+                meta={
+                    "goal": user_text[:200],
+                    "appraisal": appraisal,
+                    "drive": drive.value if drive else None,
+                },
+                preferred_channel=Channel.DIRECT_STORE,
+            )
+            if not receipt.confirmed:
+                appraisal = f"{appraisal}; cadvp=FAILED:{receipt.cc0.reason}"
+                self.journal.append_episode(
+                    kind="cadvp_failure",
+                    summary=f"Delivery not confirmed via {receipt.channel.value}",
+                    appraisal=appraisal,
+                    goal=user_text[:160],
+                    meta=receipt.to_dict(),
+                )
+                return (
+                    f"{reply}\n\n⚠ CADVP delivery failed "
+                    f"({receipt.channel.value}): {receipt.cc0.reason}"
+                )
+
         return reply
 
     def heartbeat_once(self, chat_fn: Any | None = None) -> str:
@@ -130,9 +163,20 @@ class ExecutiveMonitor:
         return "; ".join(bits)
 
     def status(self) -> dict:
+        cc0 = self.bus.probe(Channel.CRON_DELEGATED)
+        safe = self.bus.probe(Channel.DIRECT_STORE)
         return {
             "agent": self.agent_name,
             "metabolism": self.metabolism.status(),
             "heartbeat_interval_s": self.heartbeat.interval_s,
             "episodes": len(list((self.data_root / "episodes").glob("*.json"))),
+            "cadvp": {
+                "channel_A": {"available": safe.available, "reason": safe.reason},
+                "channel_C_cron": {
+                    "available": cc0.available,
+                    "reason": cc0.reason,
+                    "fractured": not cc0.cc0_pass,
+                },
+                "inbox": len(self.bus.list_inbox()),
+            },
         }

@@ -10,14 +10,15 @@ from dotenv import load_dotenv
 
 from robin_igris.system3.monitor import ExecutiveMonitor
 from robin_igris.system3.skills import SkillBootstrap
+from robin_igris.system3.cadvp import Channel, DeliveryBus
 
 
 def main(argv: list[str] | None = None) -> int:
     load_dotenv()
-    parser = argparse.ArgumentParser(description="Robin Igris System 3 (OpenLife/Sophia/OpenSkill)")
+    parser = argparse.ArgumentParser(description="Robin Igris System 3 (OpenLife/Sophia/OpenSkill/CADVP)")
     sub = parser.add_subparsers(dest="cmd", required=True)
 
-    sub.add_parser("status", help="Show metabolism + journal status")
+    sub.add_parser("status", help="Show metabolism + journal + CADVP status")
 
     p_wake = sub.add_parser("wake", help="Run one user/system wake through Hermes")
     p_wake.add_argument("text", help="Message / goal for this wake")
@@ -36,12 +37,46 @@ def main(argv: list[str] | None = None) -> int:
     p_credit = sub.add_parser("credit", help="Add budget (basic income)")
     p_credit.add_argument("amount", type=float)
 
+    p_deliver = sub.add_parser(
+        "deliver",
+        help="CADVP deliver a payload (Channel A; rejects fractured cron channel)",
+    )
+    p_deliver.add_argument("content", help="Content to deliver")
+    p_deliver.add_argument("--target", default="robin-igris")
+    p_deliver.add_argument(
+        "--channel",
+        choices=[c.value for c in Channel],
+        default=Channel.DIRECT_STORE.value,
+    )
+
+    sub.add_parser("cadvp-probe", help="Probe injection channels (CC-0)")
+
     args = parser.parse_args(argv)
     mon = ExecutiveMonitor()
 
     if args.cmd == "status":
         print(json.dumps(mon.status(), indent=2))
         return 0
+
+    if args.cmd == "cadvp-probe":
+        bus = mon.bus
+        out = {ch.value: bus.probe(ch).__dict__ for ch in Channel}
+        # Enum values aren't JSON-serializable in nested form — normalize
+        for k, v in out.items():
+            v["channel"] = v["channel"].value if hasattr(v["channel"], "value") else v["channel"]
+        print(json.dumps(out, indent=2))
+        return 0
+
+    if args.cmd == "deliver":
+        ch = Channel(args.channel)
+        receipt = mon.bus.deliver(
+            target=args.target,
+            kind="manual",
+            content=args.content,
+            preferred_channel=ch,
+        )
+        print(json.dumps(receipt.to_dict(), indent=2))
+        return 0 if receipt.confirmed else 2
 
     if args.cmd == "credit":
         mon.metabolism.credit(args.amount, reason="manual-credit")

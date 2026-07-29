@@ -15,7 +15,7 @@ You ──voice/chat──▶ Companion (AIRI Live2D)
 
 | Layer | Source | Role |
 |-------|--------|------|
-| **System 3** | [OpenLife](https://www.alphaxiv.org/abs/2606.31046), [Sophia](https://www.alphaxiv.org/abs/2512.18202), [OpenSkill](https://www.alphaxiv.org/abs/2606.06741) | Persistence, intrinsic goals, skill bootstrap |
+| **System 3** | [OpenLife](https://www.alphaxiv.org/abs/2606.31046), [Sophia](https://www.alphaxiv.org/abs/2512.18202), [OpenSkill](https://www.alphaxiv.org/abs/2606.06741), [Channel Fracture / CADVP](https://www.alphaxiv.org/abs/2606.04896v2) | Persistence, skills, **delivery verification** |
 | **Brain** | [Hermes Agent](https://github.com/NousResearch/hermes-agent) | Tools, memory, skills hub |
 | **Body** | [Project AIRI](https://github.com/moeru-ai/airi) | Live2D avatar + voice presence |
 
@@ -48,6 +48,8 @@ python -m robin_igris.system3.cli wake "Summarize this repo in 5 bullets"
 python -m robin_igris.system3.cli heartbeat
 python -m robin_igris.system3.cli skill "Write a safe git commit workflow"
 python -m robin_igris.system3.cli credit 1.0   # basic income
+python -m robin_igris.system3.cli cadvp-probe # Channel Fracture CC-0
+python -m robin_igris.system3.cli deliver "fact: deploys happen on Fridays"
 ```
 
 ## Layout
