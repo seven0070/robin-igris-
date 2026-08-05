@@ -76,6 +76,7 @@ curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash
 ```
 character/SOUL.md
 companion/                 AIRI Live2D stage
+computer/                  Carry Computer — vibe shell UI (agent is the shell)
 aos/                       Pendrive-Native Agent OS (manifest/soul/octopus)
 robin_igris/system3/       OpenLife/Sophia/OpenSkill layer
 robin_igris/voice_server.py
