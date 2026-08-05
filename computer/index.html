@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Robin Igris — Carry Computer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Syne:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="atmosphere" aria-hidden="true"></div>
+    <div class="scanlines" aria-hidden="true"></div>
+
+    <main class="stage">
+      <header class="brand-rail">
+        <p class="brand">ROBIN IGRIS</p>
+        <p class="brand-sub">Carry · pendrive-native agent OS</p>
+      </header>
+
+      <section class="chassis" id="chassis" data-power="off">
+        <div class="bezel">
+          <div class="bezel-top">
+            <span class="led" id="powerLed" title="power"></span>
+            <span class="led dim" id="diskLed" title="soul I/O"></span>
+            <span class="chassis-mark">CARRY · MICRO</span>
+          </div>
+
+          <div class="screen" id="screen">
+            <div class="crt-glow" aria-hidden="true"></div>
+
+            <!-- POWER OFF -->
+            <div class="panel panel-off" id="panelOff">
+              <button type="button" class="power-btn" id="powerBtn" aria-label="Power on">
+                <span class="power-ring"></span>
+                <span class="power-glyph">⏻</span>
+              </button>
+              <p class="hint">insert soul · press power</p>
+            </div>
+
+            <!-- BOOT -->
+            <div class="panel panel-boot hidden" id="panelBoot" aria-live="polite">
+              <pre class="boot-log" id="bootLog"></pre>
+            </div>
+
+            <!-- SHELL DESKTOP (agent is the shell) -->
+            <div class="panel panel-shell hidden" id="panelShell">
+              <aside class="soul-rail">
+                <div class="soul-stick" aria-hidden="true">
+                  <div class="usb-body">
+                    <div class="usb-chip"></div>
+                    <div class="usb-label">SOUL</div>
+                  </div>
+                  <div class="usb-metal"></div>
+                </div>
+                <dl class="vitals" id="vitals">
+                  <div><dt>tip</dt><dd id="vTip">—</dd></div>
+                  <div><dt>sealed</dt><dd id="vSealed">—</dd></div>
+                  <div><dt>wifi</dt><dd id="vWifi">offline</dd></div>
+                  <div><dt>budget</dt><dd id="vBudget">$1.00</dd></div>
+                </dl>
+                <ul class="goals" id="goalsList"></ul>
+              </aside>
+
+              <div class="terminal" id="terminal">
+                <div class="term-scroll" id="termScroll"></div>
+                <form class="term-input-row" id="termForm">
+                  <label class="sr-only" for="termInput">command</label>
+                  <span class="prompt" aria-hidden="true">›</span>
+                  <input
+                    id="termInput"
+                    name="cmd"
+                    autocomplete="off"
+                    spellcheck="false"
+                    placeholder="type :help or speak to Robin"
+                  />
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <div class="bezel-bottom">
+            <div class="hinge"></div>
+            <p class="axiom">offline-first · permissioned wifi · self-evolving</p>
+            <button type="button" class="sleep-btn" id="sleepBtn" disabled>sleep</button>
+          </div>
+        </div>
+
+        <div class="deck">
+          <div class="key-row" aria-hidden="true">
+            <span></span><span></span><span></span><span></span><span></span>
+            <span class="wide"></span><span></span><span></span><span></span>
+          </div>
+          <div class="trackpad" aria-hidden="true"></div>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
